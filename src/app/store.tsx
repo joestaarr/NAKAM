@@ -116,10 +116,13 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [showExpense, setShowExpense] = useState(true);
 
   // ─── User Profile ───
-  const [user, setUserState] = useState({
-    name: "Rangga Pratama",
-    bio: "Mahasiswa · Pemburu warkop murah 🍜",
-    avatar: "R",
+  const [user, setUserState] = useState(() => {
+    const saved = localStorage.getItem("userProfile");
+    return saved ? JSON.parse(saved) : {
+      name: "Rangga Pratama",
+      bio: "Mahasiswa · Pemburu warkop murah 🍜",
+      avatar: "R",
+    };
   });
 
   // ─── Merchant ───
@@ -143,7 +146,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     localStorage.setItem("hideBalance", hideBalance.toString());
     localStorage.setItem("campus", campus);
     localStorage.setItem("transactions", JSON.stringify(transactions));
-  }, [theme, budget, hideBalance, campus, transactions]);
+    localStorage.setItem("userProfile", JSON.stringify(user));
+  }, [theme, budget, hideBalance, campus, transactions, user]);
 
   // ─── Auth: Listen for session changes ───
   useEffect(() => {
