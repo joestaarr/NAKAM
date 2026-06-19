@@ -51,8 +51,8 @@ type Store = {
   // Auth
   supabaseUser: User | null;
   authLoading: boolean;
-  login: (email: string, password: string) => Promise<string | null>;
-  signUp: (email: string, password: string) => Promise<string | null>;
+  login: (username: string, password: string) => Promise<string | null>;
+  signUp: (username: string, password: string) => Promise<string | null>;
   logout: () => Promise<void>;
   // Theme
   theme: "light" | "dark";
@@ -214,30 +214,33 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   }, []);
 
   // ─── Auth functions ───
-  const login = async (email: string, password: string): Promise<string | null> => {
+  const login = async (username: string, password: string): Promise<string | null> => {
+    const fakeEmail = `${username.toLowerCase().replace(/\s+/g, '')}@nakam.local`;
     if (!supabase) {
-      setUserState(prev => ({ ...prev, name: email.split("@")[0] || "Mahasiswa", avatar: (email[0] || "M").toUpperCase() }));
+      setUserState(prev => ({ ...prev, name: username, avatar: (username[0] || "M").toUpperCase() }));
       return null; // No Supabase = allow any login and mock it
     }
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) return error.message;
+    const { error } = await supabase.auth.signInWithPassword({ email: fakeEmail, password });
+    if (error) return "Username atau password salah.";
     return null;
   };
 
-  const signUp = async (email: string, password: string): Promise<string | null> => {
+  const signUp = async (username: string, password: string): Promise<string | null> => {
+    const fakeEmail = `${username.toLowerCase().replace(/\s+/g, '')}@nakam.local`;
     if (!supabase) {
-      setUserState(prev => ({ ...prev, name: email.split("@")[0] || "Mahasiswa", avatar: (email[0] || "M").toUpperCase() }));
+      setUserState(prev => ({ ...prev, name: username, avatar: (username[0] || "M").toUpperCase() }));
       return null;
     }
-    const { data, error } = await supabase.auth.signUp({ email, password });
-    if (error) return error.message;
+    const { data, error } = await supabase.auth.signUp({ email: fakeEmail, password });
+    if (error) return error.message.includes("already registered") ? "Username sudah dipakai." : error.message;
+    
     // Create initial profile
     if (data.user) {
       await upsertProfile({
         id: data.user.id,
-        name: email.split("@")[0] || "Mahasiswa",
+        name: username,
         bio: "Mahasiswa · Pemburu warkop murah 🍜",
-        avatar: (email[0] || "M").toUpperCase(),
+        avatar: (username[0] || "M").toUpperCase(),
         campus: "UMM",
         budget: 1500000,
         theme: "light",

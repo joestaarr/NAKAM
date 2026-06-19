@@ -10,7 +10,7 @@ const spring = { type: "spring" as const, stiffness: 300, damping: 30 };
 export function Login({ onDone }: { onDone: () => void }) {
   const [phase, setPhase] = useState<"login" | "loading" | "budget" | "register">("login");
   const [show, setShow] = useState(false);
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [pass, setPass] = useState("");
   const [error, setError] = useState<string | null>(null);
   const { setBudget, login, signUp } = useStore();
@@ -22,7 +22,7 @@ export function Login({ onDone }: { onDone: () => void }) {
     setPhase("loading");
 
     if (hasSupabase) {
-      const err = await login(email, pass);
+      const err = await login(username, pass);
       if (err) {
         setError(err);
         setPhase("login");
@@ -35,8 +35,8 @@ export function Login({ onDone }: { onDone: () => void }) {
 
   const handleRegister = async () => {
     setError(null);
-    if (!email || !pass) {
-      setError("Email dan password wajib diisi!");
+    if (!username || !pass) {
+      setError("Username dan password wajib diisi!");
       return;
     }
     if (pass.length < 6) {
@@ -46,7 +46,7 @@ export function Login({ onDone }: { onDone: () => void }) {
     setPhase("loading");
 
     if (hasSupabase) {
-      const err = await signUp(email, pass);
+      const err = await signUp(username, pass);
       if (err) {
         setError(err);
         setPhase("register");
@@ -106,10 +106,10 @@ export function Login({ onDone }: { onDone: () => void }) {
               </AnimatePresence>
 
               <Field
-                label={phase === "register" ? "Email kampus" : "Email kampus atau Username"}
-                value={email}
-                onChange={setEmail}
-                placeholder="nama@webmail.umm.ac.id"
+                label={phase === "register" ? "Username" : "Username"}
+                value={username}
+                onChange={setUsername}
+                placeholder="misal: hamdan"
               />
               <Field
                 label="Password"
