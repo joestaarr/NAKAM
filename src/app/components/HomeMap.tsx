@@ -294,7 +294,7 @@ export function HomeMap({ onOpenProfile, onOpenWallet }: { onOpenProfile: () => 
           <EateryDetail
             eatery={selected}
             onClose={() => setSelected(null)}
-            onNavigate={() => { setRouteTarget(selected); setSelected(null); }}
+            onRoute={() => { setRouteTarget(selected); setSelected(null); }}
           />
         )}
       </AnimatePresence>

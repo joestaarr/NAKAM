@@ -95,7 +95,7 @@ export function EateryDetail({
               <span className="text-xs" style={{ fontWeight: 600 }}>🚶 {eatery.walk} jalan kaki</span>
             </div>
             <div className="absolute bottom-3 right-3 rounded-full bg-black/50 px-2.5 py-1 text-[10px] text-white backdrop-blur-md">
-              📷 {eatery.gallery.length} foto
+              📷 {eatery.gallery?.length || 0} foto
             </div>
           </div>
 
@@ -103,7 +103,7 @@ export function EateryDetail({
             <div className="flex items-start justify-between gap-3">
               <div>
                 <h2 className="text-2xl tracking-tight" style={{ fontWeight: 800 }}>{eatery.name}</h2>
-                <p className="text-sm text-gray-500">{eatery.tags.join(" · ")}</p>
+                <p className="text-sm text-gray-500">{eatery.tags?.join(" · ") || "Warung Makan"}</p>
               </div>
               <div className="flex items-center gap-1 rounded-xl bg-amber-50 px-2 py-1 text-xs">
                 <Star size={12} fill="#FFB800" stroke="#FFB800" />
@@ -137,7 +137,7 @@ export function EateryDetail({
                 >
                   <h3 className="mb-2 text-base" style={{ fontWeight: 700 }}>Menu Andalan</h3>
                   <div className="space-y-2">
-                    {eatery.menu.map((m) => (
+                    {(eatery.menu || []).map((m) => (
                       <div key={m.name} className="flex items-center gap-3 rounded-2xl border border-gray-100 bg-white p-3">
                         <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gray-50 text-2xl">{m.emoji}</div>
                         <div className="flex-1">
@@ -197,7 +197,7 @@ export function EateryDetail({
       </motion.div>
 
       <AnimatePresence>
-        {overlay === "gallery" && (
+        {overlay === "gallery" && eatery.gallery?.length > 0 && (
           <Gallery photos={eatery.gallery} onClose={() => setOverlay(null)} />
         )}
         {overlay === "checkin" && (
