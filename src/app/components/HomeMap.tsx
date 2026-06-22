@@ -34,6 +34,15 @@ const userIcon = L.divIcon({
   iconAnchor: [12, 12]
 });
 
+const createOsmMarkerIcon = () => {
+  return L.divIcon({
+    className: '',
+    html: `<div class="flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-gray-400 text-white shadow-md text-xs">📍</div>`,
+    iconSize: [32, 32],
+    iconAnchor: [16, 16]
+  });
+};
+
 function MapUpdater({ center, zoom, bounds }: { center?: [number, number], zoom?: number, bounds?: L.LatLngBoundsExpression }) {
   const map = useMap();
   useEffect(() => {
@@ -48,9 +57,9 @@ function MapUpdater({ center, zoom, bounds }: { center?: [number, number], zoom?
 
 const FILTERS = ["⭐ Rating Tertinggi", "💸 Penyelamat Akhir Bulan", "🍚 Porsi Kuli", "🔌 Spot Nugas", "🅿️ Bebas Parkir"];
 const CAMPUSES = [
-  { code: "UMM", name: "Universitas Muhammadiyah Malang", students: "30k+" },
-  { code: "UB", name: "Universitas Brawijaya", students: "60k+" },
-  { code: "UM", name: "Universitas Negeri Malang", students: "25k+" },
+  { code: "UMM", name: "Universitas Muhammadiyah Malang", students: "30k+", lat: -7.9213, lng: 112.5990 },
+  { code: "UB", name: "Universitas Brawijaya", students: "60k+", lat: -7.9525, lng: 112.6143 },
+  { code: "UM", name: "Universitas Negeri Malang", students: "25k+", lat: -7.9628, lng: 112.6183 },
 ];
 
 export function HomeMap({ onOpenProfile, onOpenWallet }: { onOpenProfile: () => void; onOpenWallet: () => void; }) {
@@ -72,6 +81,7 @@ export function HomeMap({ onOpenProfile, onOpenWallet }: { onOpenProfile: () => 
   const [userPos, setUserPos] = useState({ lat: -7.9213, lng: 112.5990 }); // Default UMM
   const { campus, setCampus, hideBalance, budget, spent, merchant, globalPromo } = useStore();
   const [supabaseEateries, setSupabaseEateries] = useState<any[] | null>(null);
+  const [osmEateries, setOsmEateries] = useState<any[]>([]);
 
   useEffect(() => {
     if ("geolocation" in navigator) {
@@ -90,6 +100,32 @@ export function HomeMap({ onOpenProfile, onOpenWallet }: { onOpenProfile: () => 
       if (!cancelled && data && data.length > 0) setSupabaseEateries(data);
       else if (!cancelled) setSupabaseEateries(null);
     });
+
+    // Fetch OSM Data
+    const camp = CAMPUSES.find(c => c.code === campus);
+    if (camp) {
+      const query = `[out:json];node(around:2000,${camp.lat},${camp.lng})[amenity~"cafe|restaurant|fast_food|food_court"];out;`;
+      fetch(`https://overpass-api.de/api/interpreter?data=${encodeURIComponent(query)}`)
+        .then(res => res.json())
+        .then(data => {
+          if (cancelled) return;
+          const mapped = data.elements.filter((e: any) => e.tags && e.tags.name).map((e: any) => ({
+            id: `osm-${e.id}`,
+            name: e.tags.name,
+            image: "https://images.unsplash.com/photo-1552566626-52f8b828add9?w=400",
+            walk: "10 mnt",
+            dominance: Math.floor(Math.random() * 40) + 40,
+            price: "Standar",
+            lat: e.lat,
+            lng: e.lon,
+            emoji: "📍",
+            isOsm: true
+          }));
+          setOsmEateries(mapped);
+        })
+        .catch(err => console.error("OSM Error:", err));
+    }
+
     return () => { cancelled = true; };
   }, [campus]);
 
@@ -148,7 +184,8 @@ export function HomeMap({ onOpenProfile, onOpenWallet }: { onOpenProfile: () => 
 
   let eateries = [
     ...(merchantEatery ? [merchantEatery] : []),
-    ...(supabaseEateries || EATERIES_BY_CAMPUS[campus] || [])
+    ...(supabaseEateries || EATERIES_BY_CAMPUS[campus] || []),
+    ...osmEateries
   ];
 
   if (activeFilter) {
@@ -281,7 +318,7 @@ export function HomeMap({ onOpenProfile, onOpenWallet }: { onOpenProfile: () => 
             <Marker 
               key={e.id} 
               position={[e.lat, e.lng]} 
-              icon={createMarkerIcon(e.isMine, e.emoji)}
+              icon={e.isOsm ? createOsmMarkerIcon() : createMarkerIcon(e.isMine, e.emoji)}
               eventHandlers={{ click: () => { setSelected(e); setRouteTarget(null); } }}
             />
           ))}
