@@ -261,46 +261,6 @@ export function HomeMap({ onOpenProfile, onOpenWallet }: { onOpenProfile: () => 
             })}
           </div>
         </div>
-
-        {/* Nearby Eateries List Card */}
-        <div className="flex-1 bg-white/90 rounded-[2rem] p-5 shadow-[0_8px_30px_rgba(0,0,0,0.08)] backdrop-blur-xl border border-white/50 flex flex-col overflow-hidden relative">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg tracking-tight text-gray-900" style={{fontWeight: 800}}>Terdekat dari Kamu</h3>
-            <button onClick={() => setShowAllSidebar(true)} className="text-xs text-[#FF6B1A] flex items-center gap-1 hover:underline" style={{fontWeight: 700}}>
-              Lihat Semua <ChevronRight size={14}/>
-            </button>
-          </div>
-          
-          <div className="flex-1 overflow-y-auto space-y-3 pr-2 no-scrollbar">
-            {eateries.length === 0 ? (
-              <div className="flex flex-col items-center justify-center h-full opacity-50">
-                <Dice5 size={48} className="mb-2 text-gray-400" />
-                <p className="text-sm font-medium">Tidak ada hasil ditemukan.</p>
-              </div>
-            ) : (
-              eateries.slice(0, 4).map((e) => (
-                <motion.div 
-                  key={e.id}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={() => { setSelected(e); setRouteTarget(null); }}
-                  className="flex gap-3 p-2 rounded-2xl bg-white border border-gray-100 shadow-sm cursor-pointer hover:shadow-md transition-shadow"
-                >
-                  <img src={e.image} alt={e.name} className="w-20 h-20 rounded-xl object-cover" />
-                  <div className="flex-1 py-1">
-                    <h4 className="text-sm text-gray-900 leading-tight mb-1" style={{fontWeight: 800}}>{e.name}</h4>
-                    <div className="flex items-center gap-2 text-xs text-gray-500 mb-1.5" style={{fontWeight: 600}}>
-                      <span className="flex items-center gap-0.5 text-[#FF8C42]"><Star size={12} fill="currentColor" /> {e.dominance || 80}%</span>
-                      <span>•</span>
-                      <span className="flex items-center gap-1"><Footprints size={12}/> {e.walk}</span>
-                    </div>
-                    <div className="text-xs text-gray-800 bg-gray-100 inline-block px-2 py-0.5 rounded-lg font-medium">{e.price}</div>
-                  </div>
-                </motion.div>
-              ))
-            )}
-          </div>
-        </div>
       </div>
 
       {/* Interactive Map Card */}
