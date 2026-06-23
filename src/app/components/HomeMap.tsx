@@ -2,7 +2,8 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import {
   Search, User, MapPin, Dice5, Wallet, Eye, EyeOff, ChevronDown, Check, X,
-  Navigation, Footprints, Bike, Car, Clock, Loader2, Maximize2, Minimize2, Star, ChevronRight, Megaphone
+  Navigation, Footprints, Bike, Car, Clock, Loader2, Maximize2, Minimize2, Star, ChevronRight, Megaphone,
+  UtensilsCrossed, Trophy, PlugZap, ParkingCircle, MoreHorizontal, TrendingUp, Sparkles
 } from "lucide-react";
 import { EateryDetail } from "./EateryDetail";
 import { Navigator } from "./Navigator";
@@ -47,6 +48,17 @@ function MapUpdater({ center, zoom, bounds }: { center?: [number, number], zoom?
 }
 
 const FILTERS = ["⭐ Rating Tertinggi", "💸 Penyelamat Akhir Bulan", "🍚 Porsi Kuli", "🔌 Spot Nugas", "🅿️ Bebas Parkir"];
+
+const SERVICE_CATEGORIES = [
+  { id: "hemat", label: "Hemat", filterKey: "💸 Penyelamat Akhir Bulan", badge: "MURAH!", badgeColor: "bg-red-500", gradient: "from-emerald-400 to-emerald-600", emoji: "💰", icon: Wallet },
+  { id: "porsi", label: "Porsi Banyak", filterKey: "🍚 Porsi Kuli", badge: "JUMBO", badgeColor: "bg-orange-500", gradient: "from-amber-400 to-orange-500", emoji: "🍚", icon: UtensilsCrossed },
+  { id: "topstar", label: "Topstar", filterKey: "⭐ Rating Tertinggi", badge: "TOP!", badgeColor: "bg-yellow-500", gradient: "from-yellow-400 to-amber-500", emoji: "⭐", icon: Trophy },
+  { id: "nugas", label: "Spot Nugas", filterKey: "🔌 Spot Nugas", badge: "WIFI", badgeColor: "bg-blue-500", gradient: "from-blue-400 to-indigo-500", emoji: "🔌", icon: PlugZap },
+  { id: "parkir", label: "Bebas Parkir", filterKey: "🅿️ Bebas Parkir", badge: "FREE", badgeColor: "bg-purple-500", gradient: "from-purple-400 to-violet-600", emoji: "🅿️", icon: ParkingCircle },
+  { id: "trending", label: "Trending", filterKey: null, badge: "HOT", badgeColor: "bg-pink-500", gradient: "from-pink-400 to-rose-500", emoji: "🔥", icon: TrendingUp },
+  { id: "promo", label: "Promo Hari Ini", filterKey: null, badge: "BARU", badgeColor: "bg-teal-500", gradient: "from-teal-400 to-cyan-500", emoji: "🎉", icon: Sparkles },
+  { id: "lainnya", label: "Lainnya", filterKey: null, badge: null, badgeColor: "", gradient: "from-gray-300 to-gray-400", emoji: "📋", icon: MoreHorizontal },
+];
 const CAMPUSES = [
   { code: "UMM", name: "Universitas Muhammadiyah Malang", students: "30k+" },
   { code: "UB", name: "Universitas Brawijaya", students: "60k+" },
@@ -243,19 +255,43 @@ export function HomeMap({ onOpenProfile, onOpenWallet }: { onOpenProfile: () => 
             <MapPin size={18} className="text-[#FF6B1A]" />
           </div>
 
-          {/* Filter Chips */}
-          <div className="flex gap-2 overflow-x-auto pb-1 no-scrollbar">
-            {FILTERS.map((f) => {
-              const isActive = activeFilter === f;
+          {/* Gojek-style Service Grid */}
+          <div className="grid grid-cols-4 gap-x-2 gap-y-3">
+            {SERVICE_CATEGORIES.map((cat, index) => {
+              const isActive = activeFilter === cat.filterKey;
+              const IconComp = cat.icon;
               return (
                 <motion.button
-                  key={f} whileTap={{ scale: 0.95 }} onClick={() => setActiveFilter(isActive ? null : f)}
-                  className={`whitespace-nowrap rounded-full px-4 py-2 text-xs shadow-sm transition-colors ${
-                    isActive ? "bg-[#FF6B1A] text-white border border-[#FF6B1A]" : "bg-white text-gray-600 border border-gray-200 hover:bg-gray-50"
-                  }`}
-                  style={{fontWeight: isActive ? 800 : 600}}
+                  key={cat.id}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.04, type: "spring", stiffness: 400, damping: 30 }}
+                  whileTap={{ scale: 0.9 }}
+                  whileHover={{ scale: 1.05, y: -2 }}
+                  onClick={() => {
+                    if (cat.filterKey) setActiveFilter(isActive ? null : cat.filterKey);
+                  }}
+                  className="flex flex-col items-center gap-1.5 relative group"
                 >
-                  {f}
+                  {/* Badge */}
+                  {cat.badge && (
+                    <div className={`absolute -top-1.5 left-1/2 -translate-x-1/2 z-10 ${cat.badgeColor} text-white text-[8px] px-1.5 py-[1px] rounded-md shadow-md`} style={{ fontWeight: 800, letterSpacing: '0.02em' }}>
+                      {cat.badge}
+                    </div>
+                  )}
+                  {/* Icon Circle */}
+                  <div className={`relative flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br ${cat.gradient} shadow-lg transition-all duration-200 ${
+                    isActive ? "ring-[3px] ring-[#FF6B1A] ring-offset-2 shadow-xl scale-105" : "group-hover:shadow-xl"
+                  }`}>
+                    <IconComp size={24} className="text-white drop-shadow-sm" strokeWidth={2.5} />
+                    <span className="absolute -bottom-0.5 -right-0.5 text-lg drop-shadow-md">{cat.emoji}</span>
+                  </div>
+                  {/* Label */}
+                  <span className={`text-[10px] leading-tight text-center max-w-[56px] transition-colors ${
+                    isActive ? "text-[#FF6B1A]" : "text-gray-600 group-hover:text-gray-900"
+                  }`} style={{ fontWeight: isActive ? 800 : 600 }}>
+                    {cat.label}
+                  </span>
                 </motion.button>
               );
             })}
