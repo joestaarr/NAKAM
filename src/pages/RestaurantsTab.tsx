@@ -12,6 +12,7 @@ import { fetchEateriesFromSupabase } from "@/services/supabaseData";
 import { MapContainer, TileLayer, Marker, Polyline, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
+import { FilterModal, FilterOptions } from "@/components/FilterModal";
 
 const spring = { type: "spring" as const, stiffness: 300, damping: 30 };
 
@@ -64,6 +65,9 @@ export const RestaurantsTab = memo(function RestaurantsTab() {
 
   const [isMapExpanded, setIsMapExpanded] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [filters, setFilters] = useState<FilterOptions>({ categories: [], minRating: 0, priceRange: "any" });
 
   const [userPos, setUserPos] = useState({ lat: -7.9213, lng: 112.5990 });
   const { campus, setCampus, merchant } = useStore();
@@ -150,6 +154,29 @@ export const RestaurantsTab = memo(function RestaurantsTab() {
   if (searchQuery) {
     eateries = eateries.filter(e => e.name.toLowerCase().includes(searchQuery.toLowerCase()));
   }
+  
+  if (filters.minRating > 0) {
+    eateries = eateries.filter(e => (e.dominance ? e.dominance / 20 : 4.5) >= filters.minRating);
+  }
+  
+  if (filters.categories.length > 0) {
+    eateries = eateries.filter(e => {
+      const eCats = [...(e.tags || []), ...(e.filter || [])].map(t => t.toLowerCase().replace(/[^a-z]/g, ''));
+      return filters.categories.some(c => eCats.some(ec => ec.includes(c.toLowerCase().replace(/[^a-z]/g, ''))));
+    });
+  }
+  
+  if (filters.priceRange !== "any") {
+    // Basic mock price range filtering for demo purposes
+    eateries = eateries.filter(e => {
+      if (!e.price) return true;
+      const p = e.price.toLowerCase();
+      if (filters.priceRange === "cheap") return p.includes("5k") || p.includes("8k") || p.includes("10k") || p.includes("12k");
+      if (filters.priceRange === "mid") return p.includes("15k") || p.includes("20k") || p.includes("25k");
+      if (filters.priceRange === "expensive") return p.includes("30k") || p.includes("40k") || p.includes("50k");
+      return true;
+    });
+  }
 
   const switchCampus = (c: string) => {
     setCampusOpen(false);
@@ -196,7 +223,7 @@ export const RestaurantsTab = memo(function RestaurantsTab() {
                 className="flex-1 bg-transparent text-sm font-medium outline-none placeholder:text-gray-400 text-gray-800"
               />
             </div>
-            <button className="w-[52px] h-[52px] flex-shrink-0 bg-[#FF6B1A] rounded-2xl flex items-center justify-center text-white shadow-md shadow-orange-500/20 active:scale-95 transition-transform">
+            <button onClick={() => setIsFilterOpen(true)} className="w-[52px] h-[52px] flex-shrink-0 bg-[#FF6B1A] rounded-2xl flex items-center justify-center text-white shadow-md shadow-orange-500/20 active:scale-95 transition-transform">
               <SlidersHorizontal size={20} />
             </button>
           </div>
@@ -322,6 +349,13 @@ export const RestaurantsTab = memo(function RestaurantsTab() {
           />
         )}
       </AnimatePresence>
+
+      <FilterModal
+        isOpen={isFilterOpen}
+        onClose={() => setIsFilterOpen(false)}
+        onApply={setFilters}
+        initialFilters={filters}
+      />
 
       {/* Campus Selector Overlay */}
       <AnimatePresence>

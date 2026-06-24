@@ -3,6 +3,8 @@ import { motion } from "motion/react";
 import { Search, MapPin, Star, Sparkles, SlidersHorizontal, Bell, Zap } from "lucide-react";
 import { useStore, fmtRp } from "@/store/store";
 import { EATERIES_BY_CAMPUS } from "@/data/mockData";
+import { FilterModal, FilterOptions } from "@/components/FilterModal";
+import { AnimatePresence } from "motion/react";
 
 const SERVICE_CATEGORIES = [
   { id: "aneka_nasi", label: "Aneka Nasi", filterKey: "nasi" },
@@ -24,6 +26,8 @@ export const HomeTab = memo(function HomeTab({ onOpenWallet }: { onOpenWallet: (
   const [searchQuery, setSearchQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [now, setNow] = useState(Date.now());
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [filters, setFilters] = useState<FilterOptions>({ categories: [], minRating: 0, priceRange: "any" });
 
   useEffect(() => {
     const timer = setInterval(() => setNow(Date.now()), 10000);
@@ -35,7 +39,30 @@ export const HomeTab = memo(function HomeTab({ onOpenWallet }: { onOpenWallet: (
   }, [flashPromos, campus, now]);
 
   const remaining = budget - spent;
-  const eateries = EATERIES_BY_CAMPUS[campus] || [];
+  let eateries = EATERIES_BY_CAMPUS[campus] || [];
+
+  if (searchQuery) {
+    eateries = eateries.filter(e => e.name.toLowerCase().includes(searchQuery.toLowerCase()));
+  }
+  if (filters.minRating > 0) {
+    eateries = eateries.filter(e => (e.dominance ? e.dominance / 20 : 4.5) >= filters.minRating);
+  }
+  if (filters.categories.length > 0) {
+    eateries = eateries.filter(e => {
+      const eCats = [...(e.tags || []), ...(e.filter || [])].map(t => t.toLowerCase().replace(/[^a-z]/g, ''));
+      return filters.categories.some(c => eCats.some(ec => ec.includes(c.toLowerCase().replace(/[^a-z]/g, ''))));
+    });
+  }
+  if (filters.priceRange !== "any") {
+    eateries = eateries.filter(e => {
+      if (!e.price) return true;
+      const p = e.price.toLowerCase();
+      if (filters.priceRange === "cheap") return p.includes("5k") || p.includes("8k") || p.includes("10k") || p.includes("12k");
+      if (filters.priceRange === "mid") return p.includes("15k") || p.includes("20k") || p.includes("25k");
+      if (filters.priceRange === "expensive") return p.includes("30k") || p.includes("40k") || p.includes("50k");
+      return true;
+    });
+  }
 
   const popular = useMemo(() => {
     return [...eateries].sort((a, b) => (b.dominance || 0) - (a.dominance || 0)).slice(0, 4);
@@ -149,7 +176,7 @@ export const HomeTab = memo(function HomeTab({ onOpenWallet }: { onOpenWallet: (
             className="flex-1 bg-transparent text-sm font-medium outline-none placeholder:text-gray-400 text-gray-800"
           />
         </div>
-        <button className="w-[52px] h-[52px] flex-shrink-0 bg-[#FF6B1A] rounded-2xl flex items-center justify-center text-white shadow-md shadow-orange-500/20 active:scale-95 transition-transform">
+        <button onClick={() => setIsFilterOpen(true)} className="w-[52px] h-[52px] flex-shrink-0 bg-[#FF6B1A] rounded-2xl flex items-center justify-center text-white shadow-md shadow-orange-500/20 active:scale-95 transition-transform">
           <SlidersHorizontal size={20} />
         </button>
       </div>
@@ -206,8 +233,15 @@ export const HomeTab = memo(function HomeTab({ onOpenWallet }: { onOpenWallet: (
           ))}
         </div>
       </div>
+      
+      <FilterModal
+        isOpen={isFilterOpen}
+        onClose={() => setIsFilterOpen(false)}
+        onApply={setFilters}
+        initialFilters={filters}
+      />
     </div>
-  ), [user, budget, spent, campus, activeFlashPromos, searchQuery, activeCategory, popular, now]);
+  ), [user, budget, spent, campus, activeFlashPromos, searchQuery, activeCategory, popular, now, isFilterOpen, filters]);
 });
 // ChevronRight is imported manually here to avoid modifying imports above for simplicity
 function ChevronRight({ size, className }: { size: number, className?: string }) {
