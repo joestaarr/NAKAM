@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect, memo } from "react";
 import { motion } from "motion/react";
-import { Search, MapPin, Star, Sparkles, SlidersHorizontal, Bell, Zap } from "lucide-react";
+import { Search, MapPin, Star, Sparkles, SlidersHorizontal, Bell, Zap, Dice5 } from "lucide-react";
 import { useStore, fmtRp } from "@/store/store";
 import { EATERIES_BY_CAMPUS } from "@/data/mockData";
 import { FilterModal, FilterOptions } from "@/components/FilterModal";
