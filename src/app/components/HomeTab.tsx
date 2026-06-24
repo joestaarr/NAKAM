@@ -5,12 +5,18 @@ import { useStore, fmtRp } from "../store";
 import { EATERIES_BY_CAMPUS } from "../data";
 
 const SERVICE_CATEGORIES = [
-  { id: "fastfood", label: "Fast food", filterKey: "Fast food" },
-  { id: "european", label: "European", filterKey: "European" },
-  { id: "italian", label: "Italian", filterKey: "Italian" },
-  { id: "japanese", label: "Japanese", filterKey: "Japanese" },
-  { id: "french", label: "French", filterKey: "French" },
-  { id: "mexican", label: "Mexican", filterKey: "Mexican" },
+  { id: "aneka_nasi", label: "Aneka Nasi", filterKey: "nasi" },
+  { id: "ayam_bebek", label: "Ayam & Bebek", filterKey: "ayam" },
+  { id: "bakso_soto", label: "Bakso & Soto", filterKey: "bakso" },
+  { id: "mie", label: "Mie", filterKey: "mie" },
+  { id: "cepat_saji", label: "Cepat Saji", filterKey: "cepat saji" },
+  { id: "jajanan", label: "Jajanan", filterKey: "jajanan" },
+  { id: "roti_kue", label: "Roti & Kue", filterKey: "roti" },
+  { id: "minuman", label: "Minuman", filterKey: "minuman" },
+  { id: "western", label: "Barat (Western)", filterKey: "western" },
+  { id: "chinese", label: "Chinese", filterKey: "chinese" },
+  { id: "jepang", label: "Jepang", filterKey: "jepang" },
+  { id: "korea", label: "Korea", filterKey: "korea" },
 ];
 
 export function HomeTab({ onOpenWallet }: { onOpenWallet: () => void }) {
