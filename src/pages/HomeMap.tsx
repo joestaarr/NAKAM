@@ -1,16 +1,16 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo, memo } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import {
   Search, User, MapPin, Dice5, Wallet, Eye, EyeOff, ChevronDown, Check, X,
   Navigation, Footprints, Bike, Car, Clock, Loader2, Maximize2, Minimize2, Star, ChevronRight, Megaphone,
   UtensilsCrossed, Trophy, PlugZap, ParkingCircle, MoreHorizontal, TrendingUp, Sparkles
 } from "lucide-react";
-import { EateryDetail } from "./EateryDetail";
-import { Navigator } from "./Navigator";
-import { useStore, fmtRp } from "../store";
-import { EATERIES_BY_CAMPUS } from "../data";
-import { fetchEateriesFromSupabase } from "../supabaseData";
-import { NakamLogo } from "./Logo";
+import { EateryDetail } from "@/components/EateryDetail";
+import { Navigator } from "@/pages/Navigator";
+import { useStore, fmtRp } from "@/store/store";
+import { EATERIES_BY_CAMPUS } from "@/data/mockData";
+import { fetchEateriesFromSupabase } from "@/services/supabaseData";
+import { NakamLogo } from "@/components/Logo";
 import { MapContainer, TileLayer, Marker, Polyline, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
@@ -65,7 +65,7 @@ const CAMPUSES = [
   { code: "UM", name: "Universitas Negeri Malang", students: "25k+" },
 ];
 
-export function HomeMap({ onOpenProfile, onOpenWallet }: { onOpenProfile: () => void; onOpenWallet: () => void; }) {
+export const HomeMap = memo(function HomeMap({ onOpenProfile, onOpenWallet }: { onOpenProfile: () => void; onOpenWallet: () => void; }) {
   const [selected, setSelected] = useState<any>(null);
   const [activeFilter, setActiveFilter] = useState<string | null>(null);
   const [campusOpen, setCampusOpen] = useState(false);
@@ -305,40 +305,42 @@ export function HomeMap({ onOpenProfile, onOpenWallet }: { onOpenProfile: () => 
         transition={{ type: "spring", stiffness: 300, damping: 30 }}
         className={`md:col-start-2 md:row-span-2 relative shrink-0 w-full h-[240px] md:h-full bg-gray-200 rounded-[2rem] md:rounded-[2.5rem] overflow-hidden shadow-2xl border-4 md:border-[6px] border-white transition-all duration-300 ${(isMapExpanded || navTarget) ? '!fixed !inset-4 sm:!inset-6 md:!inset-8 z-50' : 'z-0 order-2 md:order-none'}`}
       >
-        <MapContainer center={[userPos.lat, userPos.lng]} zoom={15} zoomControl={false} className="h-full w-full" style={{ background: '#E8EEF4' }}>
-          <TileLayer 
-            url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png" 
-            attribution="&copy; OpenStreetMap &copy; CARTO"
-          />
-          
-          <Marker position={[userPos.lat, userPos.lng]} icon={userIcon} />
-
-          {eateries.map((e: any) => (
-            <Marker 
-              key={e.id} 
-              position={[e.lat, e.lng]} 
-              icon={createMarkerIcon(e.isMine, e.emoji)}
-              eventHandlers={{ click: () => { setSelected(e); setRouteTarget(null); } }}
+        {useMemo(() => (
+          <MapContainer center={[userPos.lat, userPos.lng]} zoom={15} zoomControl={false} className="h-full w-full" style={{ background: '#E8EEF4' }}>
+            <TileLayer 
+              url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png" 
+              attribution="&copy; OpenStreetMap &copy; CARTO"
             />
-          ))}
+            
+            <Marker position={[userPos.lat, userPos.lng]} icon={userIcon} />
 
-          {routeData && (
-            <Polyline 
-              positions={routeData.path} 
-              color="#3B82F6" 
-              weight={5} 
-              opacity={0.8}
-              lineCap="round"
-              lineJoin="round"
+            {eateries.map((e: any) => (
+              <Marker 
+                key={e.id} 
+                position={[e.lat, e.lng]} 
+                icon={createMarkerIcon(e.isMine, e.emoji)}
+                eventHandlers={{ click: () => { setSelected(e); setRouteTarget(null); } }}
+              />
+            ))}
+
+            {routeData && (
+              <Polyline 
+                positions={routeData.path} 
+                color="#3B82F6" 
+                weight={5} 
+                opacity={0.8}
+                lineCap="round"
+                lineJoin="round"
+              />
+            )}
+
+            <MapUpdater 
+              center={selected ? [selected.lat, selected.lng] : (!mapBounds ? [userPos.lat, userPos.lng] : undefined)} 
+              bounds={mapBounds} 
+              zoom={(isMapExpanded || navTarget) ? 16 : 15}
             />
-          )}
-
-          <MapUpdater 
-            center={selected ? [selected.lat, selected.lng] : (!mapBounds ? [userPos.lat, userPos.lng] : undefined)} 
-            bounds={mapBounds} 
-            zoom={(isMapExpanded || navTarget) ? 16 : 15}
-          />
-        </MapContainer>
+          </MapContainer>
+        ), [userPos.lat, userPos.lng, eateries, routeData, selected, mapBounds, isMapExpanded, navTarget])}
 
         {/* Skeleton overlay during campus switch */}
         <AnimatePresence>
@@ -598,4 +600,4 @@ function RouteInfoCard({ target, mode, setMode, routeData, fetching, onClose, on
       </motion.button>
     </motion.div>
   );
-}
+});

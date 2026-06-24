@@ -1,12 +1,12 @@
 import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from "react";
-import { supabase, isSupabaseConfigured } from "./supabase";
+import { supabase, isSupabaseConfigured } from "@/services/supabase";
 import {
   fetchProfile, upsertProfile,
   fetchTransactions, addTransactionToSupabase,
   fetchMerchant, upsertMerchant, updateMerchantStatus, updateMerchantInfo, deleteMerchant,
   addMenuItemToSupabase, updateMenuItemInSupabase, deleteMenuItemFromSupabase,
   completeOrderInSupabase, insertMockOrder, incrementMerchantViews,
-} from "./supabaseData";
+} from "@/services/supabaseData";
 import type { User } from "@supabase/supabase-js";
 
 export type Transaction = {

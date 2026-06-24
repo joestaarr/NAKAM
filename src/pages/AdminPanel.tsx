@@ -1,11 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, memo, useMemo } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { ArrowLeft, Check, Store, Image as ImageIcon, Loader2, LayoutDashboard, Database, PlusCircle, Megaphone, Trash2 } from "lucide-react";
 import { MapContainer, TileLayer, Marker, useMapEvents, useMap } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
-import { adminAddEatery, fetchAllEateriesForAdmin, deleteEateryByAdmin, uploadImageToSupabase } from "../supabaseData";
-import { useStore } from "../store";
+import { adminAddEatery, fetchAllEateriesForAdmin, deleteEateryByAdmin, uploadImageToSupabase } from "@/services/supabaseData";
+import { useStore } from "@/store/store";
 
 const spring = { type: "spring" as const, stiffness: 300, damping: 30 };
 
@@ -25,7 +25,7 @@ const createMarkerIcon = (emoji: string) => L.divIcon({
   iconAnchor: [20, 20]
 });
 
-export function AdminPanel({ onBack }: { onBack: () => void }) {
+export const AdminPanel = memo(function AdminPanel({ onBack }: { onBack: () => void }) {
   const [activeTab, setActiveTab] = useState<"overview" | "data" | "add" | "promo">("overview");
 
   return (
@@ -137,7 +137,7 @@ function CampusStatBar({ label, count, max, color }: any) {
       </div>
     </div>
   );
-}
+});
 
 function TabData() {
   const [data, setData] = useState<any[]>([]);

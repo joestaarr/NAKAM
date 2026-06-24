@@ -1,10 +1,10 @@
-import { useState } from "react";
+import { useState, memo, useMemo } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import {
   ArrowLeft, Zap, Edit2, TrendingUp, Eye, Plus, Trash2, X, Check, Store, MapPin,
   Bell, Sparkles, ChevronRight, Power, ShoppingBag,
 } from "lucide-react";
-import { useStore, fmtRp, MerchantMenuItem } from "../store";
+import { useStore, fmtRp, MerchantMenuItem } from "@/store/store";
 import { MapContainer, TileLayer, Marker, useMap, useMapEvents } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
@@ -32,11 +32,11 @@ const CAMPUSES = [
 
 const EMOJI_PRESET = ["🍜", "🍳", "🍗", "☕", "🍚", "🥘", "🍔", "🍱", "🧋", "🍡"];
 
-export function MerchantDashboard({ onBack }: { onBack: () => void }) {
+export const MerchantDashboard = memo(function MerchantDashboard({ onBack }: { onBack: () => void }) {
   const { merchant } = useStore();
   if (!merchant.onboarded) return <Onboarding onBack={onBack} />;
   return <Dashboard onBack={onBack} />;
-}
+});
 
 /* ---------------- ONBOARDING ---------------- */
 

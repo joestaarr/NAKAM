@@ -1,8 +1,8 @@
-import { useState, useRef, useMemo } from "react";
+import { useState, useRef, useMemo, memo } from "react";
 import { motion, AnimatePresence, useScroll, useTransform, useSpring } from "motion/react";
 import { ArrowLeft, Eye, EyeOff, Edit3, X, Delete, AlertTriangle, TrendingDown, Target, Wallet, Calendar, Sparkles } from "lucide-react";
 import { BarChart, Bar, ResponsiveContainer, Tooltip, Cell, XAxis } from "recharts";
-import { useStore, fmtRp, Transaction } from "../store";
+import { useStore, fmtRp, Transaction } from "@/store/store";
 
 const spring = { type: "spring" as const, stiffness: 300, damping: 30 };
 
@@ -19,7 +19,7 @@ const itemAnim = {
   show: { opacity: 1, y: 0, transition: spring }
 };
 
-export function WalletScreen({ onBack }: { onBack: () => void }) {
+export const WalletScreen = memo(function WalletScreen({ onBack }: { onBack: () => void }) {
   const { budget, spent, transactions, hideBalance, toggleHideBalance, setBudget } = useStore();
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(String(budget));
@@ -241,7 +241,7 @@ export function WalletScreen({ onBack }: { onBack: () => void }) {
       </AnimatePresence>
     </motion.div>
   );
-}
+});
 
 function Gauge({ pct, danger }: { pct: number; danger: boolean }) {
   const r = 110, c = 2 * Math.PI * r;

@@ -4,8 +4,8 @@ import {
   X, Plug, Users, Wallet, Footprints, Flame, Navigation,
   Plus, ChevronUp, Star, ChevronLeft, ChevronRight, Delete, Check,
 } from "lucide-react";
-import { ImageWithFallback } from "./figma/ImageWithFallback";
-import { useStore, fmtRp } from "../store";
+import { ImageWithFallback } from "@/components/figma/ImageWithFallback";
+import { useStore, fmtRp } from "@/store/store";
 
 const spring = { type: "spring" as const, stiffness: 300, damping: 30 };
 

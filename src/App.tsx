@@ -1,16 +1,16 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { AnimatePresence, motion } from "motion/react";
-import { Splash } from "./components/Splash";
-import { Login } from "./components/Login";
-import { HomeTab } from "./components/HomeTab";
-import { RestaurantsTab } from "./components/RestaurantsTab";
-import { HistoryTab } from "./components/HistoryTab";
-import { ProfileTab } from "./components/Profile";
-import { MerchantDashboard } from "./components/MerchantDashboard";
-import { WalletScreen } from "./components/Wallet";
-import { AdminPanel } from "./components/AdminPanel";
-import { BottomNavBar } from "./components/BottomNavBar";
-import { StoreProvider, useStore } from "./store";
+import { Splash } from "@/components/Splash";
+import { Login } from "@/pages/Login";
+import { HomeTab } from "@/pages/HomeTab";
+import { RestaurantsTab } from "@/pages/RestaurantsTab";
+import { HistoryTab } from "@/pages/HistoryTab";
+import { ProfileTab } from "@/pages/Profile";
+import { MerchantDashboard } from "@/pages/MerchantDashboard";
+import { WalletScreen } from "@/components/Wallet";
+import { AdminPanel } from "@/pages/AdminPanel";
+import { BottomNavBar } from "@/components/BottomNavBar";
+import { StoreProvider, useStore } from "@/store/store";
 
 const spring = { type: "spring" as const, stiffness: 300, damping: 30 };
 
@@ -25,22 +25,43 @@ function Inner() {
   const [adminOpen, setAdminOpen] = useState(false);
   const { theme, supabaseUser } = useStore();
 
+  const handleOpenWallet = useCallback(() => setWalletOpen(true), []);
+  const handleCloseWallet = useCallback(() => setWalletOpen(false), []);
+  
+  const handleOpenMerchant = useCallback(() => setMerchantOpen(true), []);
+  const handleCloseMerchant = useCallback(() => setMerchantOpen(false), []);
+  
+  const handleOpenAdmin = useCallback(() => setAdminOpen(true), []);
+  const handleCloseAdmin = useCallback(() => setAdminOpen(false), []);
+
+  const handleLogout = useCallback(() => {
+    setWalletOpen(false);
+    setMerchantOpen(false);
+    setAdminOpen(false);
+    setPhase("login");
+    setActiveTab("home");
+  }, []);
+
+  const handleSplashDone = useCallback(() => {
+    if (supabaseUser) setPhase("main");
+    else setPhase("login");
+  }, [supabaseUser]);
+
+  const handleLoginDone = useCallback(() => setPhase("main"), []);
+
   return (
     <div className={`relative flex min-h-[100dvh] w-full items-center justify-center overflow-hidden p-0 bg-slate-100 ${theme === "dark" ? "bg-[#020617]" : ""}`}>
       <div className="relative w-full h-[100dvh] overflow-hidden bg-white text-slate-900 md:max-w-md shadow-2xl">
         <AnimatePresence>
           {phase === "splash" && (
-            <Splash key="splash" onDone={() => {
-              if (supabaseUser) setPhase("main");
-              else setPhase("login");
-            }} />
+            <Splash key="splash" onDone={handleSplashDone} />
           )}
         </AnimatePresence>
 
         <AnimatePresence mode="wait">
           {phase === "login" ? (
             <motion.div key="login" className="absolute inset-0" exit={{ x: "-30%", opacity: 0 }} transition={spring}>
-              <Login onDone={() => setPhase("main")} />
+              <Login onDone={handleLoginDone} />
             </motion.div>
           ) : phase === "main" ? (
             <motion.div key="main" className="absolute inset-0 flex flex-col bg-[#F8F9FA]" initial={{ x: "100%" }} animate={{ x: 0 }} transition={spring}>
@@ -48,7 +69,7 @@ function Inner() {
                 <AnimatePresence mode="wait">
                   {activeTab === "home" && (
                     <motion.div key="home" className="absolute inset-0 overflow-y-auto no-scrollbar" initial={{opacity:0, y:10}} animate={{opacity:1, y:0}} exit={{opacity:0, y:-10}}>
-                      <HomeTab onOpenWallet={() => setWalletOpen(true)} />
+                      <HomeTab onOpenWallet={handleOpenWallet} />
                     </motion.div>
                   )}
                   {activeTab === "restaurants" && (
@@ -64,15 +85,9 @@ function Inner() {
                   {activeTab === "profile" && (
                     <motion.div key="profile" className="absolute inset-0 overflow-y-auto no-scrollbar" initial={{opacity:0, y:10}} animate={{opacity:1, y:0}} exit={{opacity:0, y:-10}}>
                       <ProfileTab
-                        onOpenMerchant={() => setMerchantOpen(true)}
-                        onOpenAdmin={() => setAdminOpen(true)}
-                        onLogout={() => {
-                          setWalletOpen(false);
-                          setMerchantOpen(false);
-                          setAdminOpen(false);
-                          setPhase("login");
-                          setActiveTab("home");
-                        }}
+                        onOpenMerchant={handleOpenMerchant}
+                        onOpenAdmin={handleOpenAdmin}
+                        onLogout={handleLogout}
                       />
                     </motion.div>
                   )}
@@ -84,13 +99,13 @@ function Inner() {
         </AnimatePresence>
 
         <AnimatePresence>
-          {walletOpen && <WalletScreen key="wallet" onBack={() => setWalletOpen(false)} />}
+          {walletOpen && <WalletScreen key="wallet" onBack={handleCloseWallet} />}
         </AnimatePresence>
         <AnimatePresence>
-          {merchantOpen && <MerchantDashboard key="merchant" onBack={() => setMerchantOpen(false)} />}
+          {merchantOpen && <MerchantDashboard key="merchant" onBack={handleCloseMerchant} />}
         </AnimatePresence>
         <AnimatePresence>
-          {adminOpen && <AdminPanel key="admin" onBack={() => setAdminOpen(false)} />}
+          {adminOpen && <AdminPanel key="admin" onBack={handleCloseAdmin} />}
         </AnimatePresence>
       </div>
     </div>

@@ -1,8 +1,8 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, memo } from "react";
 import { motion } from "motion/react";
 import { Search, MapPin, Star, Sparkles, SlidersHorizontal, Bell, Zap } from "lucide-react";
-import { useStore, fmtRp } from "../store";
-import { EATERIES_BY_CAMPUS } from "../data";
+import { useStore, fmtRp } from "@/store/store";
+import { EATERIES_BY_CAMPUS } from "@/data/mockData";
 
 const SERVICE_CATEGORIES = [
   { id: "aneka_nasi", label: "Aneka Nasi", filterKey: "nasi" },
@@ -19,7 +19,7 @@ const SERVICE_CATEGORIES = [
   { id: "korea", label: "Korea", filterKey: "korea" },
 ];
 
-export function HomeTab({ onOpenWallet }: { onOpenWallet: () => void }) {
+export const HomeTab = memo(function HomeTab({ onOpenWallet }: { onOpenWallet: () => void }) {
   const { user, budget, spent, campus, flashPromos } = useStore();
   const [searchQuery, setSearchQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
@@ -41,7 +41,7 @@ export function HomeTab({ onOpenWallet }: { onOpenWallet: () => void }) {
     return [...eateries].sort((a, b) => (b.dominance || 0) - (a.dominance || 0)).slice(0, 4);
   }, [eateries]);
 
-  return (
+  return useMemo(() => (
     <div className="flex flex-col min-h-screen bg-[#F8F9FA] pb-24 font-sans text-slate-800">
       {/* Header Profile & Notification */}
       <div className="px-6 pt-12 pb-4 flex items-center justify-between">
@@ -207,7 +207,7 @@ export function HomeTab({ onOpenWallet }: { onOpenWallet: () => void }) {
         </div>
       </div>
     </div>
-  );
+  ), [user, budget, spent, campus, activeFlashPromos, searchQuery, activeCategory, popular, now]);
 }
 
 // ChevronRight is imported manually here to avoid modifying imports above for simplicity

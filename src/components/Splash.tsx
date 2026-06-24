@@ -1,6 +1,6 @@
 import { motion } from "motion/react";
 import { useEffect } from "react";
-import { NakamLogo } from "./Logo";
+import { NakamLogo } from "@/components/Logo";
 
 export function Splash({ onDone }: { onDone: () => void }) {
   useEffect(() => {

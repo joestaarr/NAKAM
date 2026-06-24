@@ -1,14 +1,14 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, memo } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import {
   Search, MapPin, Dice5, ChevronDown, Check, X,
   Navigation, Footprints, Bike, Car, Clock, Loader2, Maximize2, Minimize2, Star, SlidersHorizontal, ChevronLeft, Heart
 } from "lucide-react";
-import { EateryDetail } from "./EateryDetail";
-import { Navigator } from "./Navigator";
-import { useStore, fmtRp } from "../store";
-import { EATERIES_BY_CAMPUS } from "../data";
-import { fetchEateriesFromSupabase } from "../supabaseData";
+import { EateryDetail } from "@/components/EateryDetail";
+import { Navigator } from "@/pages/Navigator";
+import { useStore, fmtRp } from "@/store/store";
+import { EATERIES_BY_CAMPUS } from "@/data/mockData";
+import { fetchEateriesFromSupabase } from "@/services/supabaseData";
 import { MapContainer, TileLayer, Marker, Polyline, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
@@ -51,7 +51,7 @@ const CAMPUSES = [
   { code: "UM", name: "Universitas Negeri Malang", students: "25k+" },
 ];
 
-export function RestaurantsTab() {
+export const RestaurantsTab = memo(function RestaurantsTab() {
   const [selected, setSelected] = useState<any>(null);
   const [campusOpen, setCampusOpen] = useState(false);
   const [campusLoading, setCampusLoading] = useState(false);
@@ -362,7 +362,7 @@ export function RestaurantsTab() {
       </AnimatePresence>
     </div>
   );
-}
+});
 
 function RouteInfoCard({ target, mode, setMode, routeData, fetching, onClose, onStart }: any) {
   const modes = [

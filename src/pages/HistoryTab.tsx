@@ -1,11 +1,11 @@
-import { useState } from "react";
+import { useState, memo } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { useStore, fmtRp, Transaction } from "../store";
+import { useStore, fmtRp, Transaction } from "@/store/store";
 import { Calendar, TrendingDown, X, Check } from "lucide-react";
 
 const spring = { type: "spring" as const, stiffness: 300, damping: 30 };
 
-export function HistoryTab() {
+export const HistoryTab = memo(function HistoryTab() {
   const { transactions, hideBalance, spent } = useStore();
   const [tx, setTx] = useState<Transaction | null>(null);
 
@@ -72,7 +72,7 @@ export function HistoryTab() {
       </AnimatePresence>
     </div>
   );
-}
+});
 
 function TxDetail({ tx, onClose }: { tx: Transaction; onClose: () => void }) {
   return (

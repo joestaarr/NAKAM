@@ -1,12 +1,12 @@
-import { useState, useRef } from "react";
+import { useState, useRef, memo, useMemo } from "react";
 import { motion, AnimatePresence, useScroll, useTransform } from "motion/react";
 import { ArrowLeft, Edit3, Shield, Sun, Moon, Store, ChevronRight, Check, Ghost, EyeOff, Loader2, Camera, Instagram, Twitter } from "lucide-react";
-import { useStore } from "../store";
-import { uploadImageToSupabase } from "../supabaseData";
+import { useStore } from "@/store/store";
+import { uploadImageToSupabase } from "@/services/supabaseData";
 
 const spring = { type: "spring" as const, stiffness: 300, damping: 30 };
 
-export function ProfileTab({ onOpenMerchant, onOpenAdmin, onLogout }: { onOpenMerchant: () => void; onOpenAdmin: () => void; onLogout: () => void }) {
+export const ProfileTab = memo(function ProfileTab({ onOpenMerchant, onOpenAdmin, onLogout }: { onOpenMerchant: () => void; onOpenAdmin: () => void; onLogout: () => void }) {
   const { user, setUser, theme, toggleTheme, ghostMode, setGhostMode, showExpense, setShowExpense, campus } = useStore();
   const [view, setView] = useState<"main" | "edit" | "privacy">("main");
   const [draft, setDraft] = useState(user);
@@ -19,7 +19,7 @@ export function ProfileTab({ onOpenMerchant, onOpenAdmin, onLogout }: { onOpenMe
   const coverY = useTransform(scrollY, [0, 200], [0, -60]);
   const titleOpacity = useTransform(scrollY, [60, 140], [0, 1]);
 
-  return (
+  return useMemo(() => (
     <motion.div
       ref={scrollerRef}
       initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={spring}
@@ -200,8 +200,8 @@ export function ProfileTab({ onOpenMerchant, onOpenAdmin, onLogout }: { onOpenMe
         )}
       </AnimatePresence>
     </motion.div>
-  );
-}
+  ), [user, theme, ghostMode, showExpense, campus, view, draft, confirmLogout, uploadingAvatar, uploadingBanner]);
+});
 
 function Row({ icon, label, sub, onClick, theme, highlight }: any) {
   return (

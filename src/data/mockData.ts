@@ -1,4 +1,4 @@
-import type { Eatery } from "./components/EateryDetail";
+import type { Eatery } from "@/components/EateryDetail";
 
 const sample = (id: string, name: string, image: string, walk: string, dom: number, price: string, tags: string[]): Eatery & { lat: number; lng: number; campus: string; filter: string[] } => ({
   id, name, image, walk, dominance: dom, price, tags,

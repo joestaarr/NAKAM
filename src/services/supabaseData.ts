@@ -1,6 +1,6 @@
-import { supabase } from "./supabase";
-import type { Eatery } from "./components/EateryDetail";
-import type { Transaction, Merchant, MerchantMenuItem, MerchantOrder } from "./store";
+import { supabase } from "@/services/supabase";
+import type { Eatery } from "@/components/EateryDetail";
+import type { Transaction, Merchant, MerchantMenuItem, MerchantOrder } from "@/store/store";
 
 // ─── Types matching Supabase rows ───
 

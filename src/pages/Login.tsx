@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { Eye, EyeOff, Utensils, MapPin, Loader2, Wallet, AlertCircle } from "lucide-react";
-import { useStore, fmtRp } from "../store";
-import { NakamLogo } from "./Logo";
-import { isSupabaseConfigured } from "../supabase";
+import { useStore, fmtRp } from "@/store/store";
+import { NakamLogo } from "@/components/Logo";
+import { isSupabaseConfigured } from "@/services/supabase";
 
 const spring = { type: "spring" as const, stiffness: 300, damping: 30 };
 
