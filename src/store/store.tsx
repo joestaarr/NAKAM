@@ -256,7 +256,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
   // ─── Auth functions ───
   const login = async (username: string, password: string): Promise<string | null> => {
-    const fakeEmail = `${username.toLowerCase().replace(/\s+/g, '')}@nakam.local`;
+    const fakeEmail = `${btoa(username).replace(/=/g, '')}@nakam.local`;
     if (!supabase) {
       const saved = localStorage.getItem("userProfile_" + username);
       if (saved) {
@@ -272,8 +272,24 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   };
 
   const signUp = async (username: string, password: string): Promise<string | null> => {
-    const fakeEmail = `${username.toLowerCase().replace(/\s+/g, '')}@nakam.local`;
+    if (username.toLowerCase() === "admincuy" || username.toLowerCase() === "admin") {
+      return "Username ini tidak tersedia.";
+    }
+    
+    // Gunakan btoa untuk memastikan email unik secara case-sensitive di Supabase (karena Supabase melowercase email)
+    const fakeEmail = `${btoa(username).replace(/=/g, '')}@nakam.local`;
     if (!supabase) {
+      // Check if username already exists locally (case-sensitive)
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && key.startsWith("userProfile_")) {
+          const existingUsername = key.substring("userProfile_".length);
+          if (existingUsername === username) {
+            return "Username sudah dipakai.";
+          }
+        }
+      }
+
       setUserState({
         name: username,
         bio: "Mahasiswa · Pemburu warkop murah 🍜",
