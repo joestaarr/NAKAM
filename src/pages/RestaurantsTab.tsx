@@ -12,7 +12,8 @@ import { fetchEateriesFromSupabase } from "@/services/supabaseData";
 import { MapContainer, TileLayer, Marker, Polyline, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
-import { FilterModal, FilterOptions } from "@/components/FilterModal";
+import { FilterModal } from "@/components/FilterModal";
+import type { FilterOptions } from "@/components/FilterModal";
 
 const spring = { type: "spring" as const, stiffness: 300, damping: 30 };
 

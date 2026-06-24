@@ -3,7 +3,8 @@ import { motion } from "motion/react";
 import { Search, MapPin, Star, Sparkles, SlidersHorizontal, Bell, Zap, Dice5 } from "lucide-react";
 import { useStore, fmtRp } from "@/store/store";
 import { EATERIES_BY_CAMPUS } from "@/data/mockData";
-import { FilterModal, FilterOptions } from "@/components/FilterModal";
+import { FilterModal } from "@/components/FilterModal";
+import type { FilterOptions } from "@/components/FilterModal";
 import { TerserahRoulette } from "@/components/TerserahRoulette";
 import { AnimatePresence } from "motion/react";
 

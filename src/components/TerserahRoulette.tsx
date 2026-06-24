@@ -1,7 +1,6 @@
 import { motion, AnimatePresence } from "motion/react";
 import { X, Dice5, MapPin, Star, Sparkles } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
-import confetti from "canvas-confetti";
 
 export function TerserahRoulette({
   isOpen,
@@ -52,14 +51,6 @@ export function TerserahRoulette({
     setTimeout(() => {
       setWinner(selectedEatery);
       setIsSpinning(false);
-      
-      // Fire confetti
-      confetti({
-        particleCount: 100,
-        spread: 70,
-        origin: { y: 0.6 },
-        colors: ['#FF6B1A', '#FFB347', '#ffffff']
-      });
     }, 6000); // match animation duration
 
     return offset;
@@ -99,12 +90,6 @@ export function TerserahRoulette({
     setTimeout(() => {
       setWinner(selected);
       setIsSpinning(false);
-      confetti({
-        particleCount: 150,
-        spread: 80,
-        origin: { y: 0.5 },
-        colors: ['#FF6B1A', '#FFB347', '#ffffff']
-      });
     }, 6500);
   };
 
