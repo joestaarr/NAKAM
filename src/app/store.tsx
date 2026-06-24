@@ -27,6 +27,16 @@ export type MerchantMenuItem = {
   sold: number;
 };
 
+export type FlashPromo = {
+  id: string;
+  merchantName: string;
+  merchantEmoji: string;
+  menuName: string;
+  menuEmoji: string;
+  campus: string;
+  endTime: string;
+};
+
 export type MerchantOrder = {
   id: string;
   item: string;
@@ -66,6 +76,8 @@ type Store = {
   // Promo
   globalPromo: string;
   setGlobalPromo: (v: string) => void;
+  flashPromos: FlashPromo[];
+  addFlashPromo: (p: Omit<FlashPromo, "id">) => void;
   addExpense: (t: Omit<Transaction, "id" | "date">) => void;
   transactions: Transaction[];
   hideBalance: boolean;
@@ -111,6 +123,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   // ─── Budget & Wallet ───
   const [budget, setBudgetState] = useState(() => parseInt(localStorage.getItem("budget") || "0", 10));
   const [globalPromo, setGlobalPromoState] = useState(() => localStorage.getItem("globalPromo") || "");
+  const [flashPromos, setFlashPromos] = useState<FlashPromo[]>(() => {
+    const saved = localStorage.getItem("flashPromos");
+    return saved ? JSON.parse(saved) : [];
+  });
   const [hideBalance, setHide] = useState(() => localStorage.getItem("hideBalance") === "true");
   const [transactions, setTransactions] = useState<Transaction[]>(() => {
     const saved = localStorage.getItem("transactions");
@@ -153,11 +169,12 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     localStorage.setItem("theme", theme);
     localStorage.setItem("budget", budget.toString());
     localStorage.setItem("globalPromo", globalPromo);
+    localStorage.setItem("flashPromos", JSON.stringify(flashPromos));
     localStorage.setItem("hideBalance", hideBalance.toString());
     localStorage.setItem("campus", campus);
     localStorage.setItem("transactions", JSON.stringify(transactions));
     localStorage.setItem("userProfile", JSON.stringify(user));
-  }, [theme, budget, globalPromo, hideBalance, campus, transactions, user]);
+  }, [theme, budget, globalPromo, flashPromos, hideBalance, campus, transactions, user]);
 
   // ─── Auth: Listen for session changes ───
   useEffect(() => {
@@ -292,6 +309,26 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   // ─── Promo ───
   const setGlobalPromo = (v: string) => {
     setGlobalPromoState(v);
+  };
+
+  const addFlashPromo = (p: Omit<FlashPromo, "id">) => {
+    const promo = { ...p, id: "fp" + Date.now() + Math.random().toString(36).substring(2, 9) };
+    setFlashPromos((prev) => [promo, ...prev]);
+
+    if ("Notification" in window) {
+      const showNotif = () => {
+        new Notification(`⚡ Flash Promo di ${p.merchantName}`, {
+          body: `Promo spesial ${p.menuName}! Waktu terbatas hingga ${new Date(p.endTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}.`,
+        });
+      };
+      if (Notification.permission === "granted") {
+        showNotif();
+      } else if (Notification.permission !== "denied") {
+        Notification.requestPermission().then(permission => {
+          if (permission === "granted") showNotif();
+        });
+      }
+    }
   };
 
   // ─── User profile ───
@@ -461,6 +498,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         spent,
         globalPromo,
         setGlobalPromo,
+        flashPromos,
+        addFlashPromo,
         addExpense,
         transactions,
         hideBalance,

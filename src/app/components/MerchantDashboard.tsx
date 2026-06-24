@@ -268,20 +268,19 @@ function Dashboard({ onBack }: { onBack: () => void }) {
   const {
     merchant, setMerchantStatus, setMerchantInfo,
     addMenuItem, updateMenuItem, removeMenuItem, toggleMenuAvailable,
-    pushMockOrder, completeOrder, deleteStore
+    pushMockOrder, completeOrder, deleteStore, addFlashPromo
   } = useStore();
   const [tab, setTab] = useState<"home" | "menu" | "order" | "info">("home");
   const [showBanner, setShowBanner] = useState(false);
   const [menuModal, setMenuModal] = useState<{ open: boolean; item?: MerchantMenuItem }>({ open: false });
+  const [promoModalOpen, setPromoModalOpen] = useState(false);
 
   const newOrders = merchant.orders.filter((o) => o.status === "baru").length;
   const totalSold = merchant.menu.reduce((s, m) => s + m.sold, 0);
   const revenue = merchant.menu.reduce((s, m) => s + m.sold * m.price, 0);
 
   const triggerPromo = () => {
-    pushMockOrder();
-    setShowBanner(true);
-    setTimeout(() => setShowBanner(false), 3000);
+    setPromoModalOpen(true);
   };
 
   return (
@@ -555,6 +554,18 @@ function Dashboard({ onBack }: { onBack: () => void }) {
             }}
           />
         )}
+        {promoModalOpen && (
+          <FlashPromoModal
+            merchant={merchant}
+            onClose={() => setPromoModalOpen(false)}
+            onSave={(promoData: any) => {
+              addFlashPromo(promoData);
+              setPromoModalOpen(false);
+              setShowBanner(true);
+              setTimeout(() => setShowBanner(false), 3000);
+            }}
+          />
+        )}
       </AnimatePresence>
     </motion.div>
   );
@@ -628,6 +639,86 @@ function MenuItemModal({ item, onClose, onSave }: { item?: MerchantMenuItem; onC
           onClick={() => name && price && onSave({ name, price: parseInt(price), emoji })}
           className="mt-5 w-full rounded-2xl bg-gradient-to-r from-[#FF6B1A] to-[#FF8C42] py-3.5 text-white" style={{ fontWeight: 700 }}>
           {item ? "Simpan Perubahan" : "Tambah Menu"}
+        </motion.button>
+      </motion.div>
+    </motion.div>
+  );
+}
+
+function FlashPromoModal({ merchant, onClose, onSave }: any) {
+  const [selectedMenu, setSelectedMenu] = useState<string>(merchant.menu[0]?.name || "");
+  const [duration, setDuration] = useState<number>(30);
+  const [customHours, setCustomHours] = useState("");
+  const [customMinutes, setCustomMinutes] = useState("");
+
+  const handleSave = () => {
+    if (!selectedMenu) return;
+    const menu = merchant.menu.find((m: any) => m.name === selectedMenu);
+    
+    let totalMinutes = duration;
+    if (duration === -1) {
+      totalMinutes = (parseInt(customHours) || 0) * 60 + (parseInt(customMinutes) || 0);
+    }
+    if (totalMinutes <= 0) return;
+
+    const endTime = new Date(Date.now() + totalMinutes * 60000).toISOString();
+    
+    onSave({
+      merchantName: merchant.name,
+      merchantEmoji: merchant.emoji,
+      menuName: menu.name,
+      menuEmoji: menu.emoji,
+      campus: merchant.campus,
+      endTime
+    });
+  };
+
+  return (
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+      className="absolute inset-0 z-[60] flex items-end justify-center bg-black/60 backdrop-blur-sm">
+      <motion.div initial={{ y: 400 }} animate={{ y: 0 }} exit={{ y: 400 }} transition={spring}
+        className="w-full rounded-t-3xl bg-white p-6 text-gray-900 pb-10">
+        <div className="mb-1 flex items-center justify-between">
+          <h3 className="text-xl tracking-tight" style={{ fontWeight: 800 }}>⚡ Buat Flash Promo</h3>
+          <button onClick={onClose} className="rounded-full bg-gray-100 p-1.5"><X size={14} /></button>
+        </div>
+        <p className="text-xs text-gray-500">Kirim notifikasi ke semua mahasiswa di sekitar {merchant.campus}.</p>
+
+        <div className="mt-4 space-y-4">
+          <div>
+            <label className="text-xs text-gray-500 font-bold">Pilih Menu Promo</label>
+            <select value={selectedMenu} onChange={e => setSelectedMenu(e.target.value)}
+              className="mt-1.5 w-full rounded-2xl border border-gray-200 px-4 py-3 text-sm outline-none font-bold">
+              {merchant.menu.map((m: any) => (
+                <option key={m.id} value={m.name}>{m.emoji} {m.name}</option>
+              ))}
+              {merchant.menu.length === 0 && <option value="">Belum ada menu</option>}
+            </select>
+          </div>
+
+          <div>
+            <label className="text-xs text-gray-500 font-bold">Durasi Promo</label>
+            <div className="mt-1.5 grid grid-cols-3 gap-2">
+              <button onClick={() => setDuration(30)} className={`py-2 rounded-xl border text-sm font-bold transition-all ${duration === 30 ? "bg-[#FF6B1A] text-white border-[#FF6B1A]" : "bg-gray-50 text-gray-600 border-gray-200"}`}>30 Menit</button>
+              <button onClick={() => setDuration(60)} className={`py-2 rounded-xl border text-sm font-bold transition-all ${duration === 60 ? "bg-[#FF6B1A] text-white border-[#FF6B1A]" : "bg-gray-50 text-gray-600 border-gray-200"}`}>1 Jam</button>
+              <button onClick={() => setDuration(120)} className={`py-2 rounded-xl border text-sm font-bold transition-all ${duration === 120 ? "bg-[#FF6B1A] text-white border-[#FF6B1A]" : "bg-gray-50 text-gray-600 border-gray-200"}`}>2 Jam</button>
+            </div>
+            
+            <button onClick={() => setDuration(-1)} className={`mt-2 w-full py-2 rounded-xl border text-sm font-bold transition-all ${duration === -1 ? "bg-[#FF6B1A] text-white border-[#FF6B1A]" : "bg-gray-50 text-gray-600 border-gray-200"}`}>Manual / Kustom</button>
+            
+            {duration === -1 && (
+              <div className="mt-2 flex gap-2">
+                <input value={customHours} onChange={e => setCustomHours(e.target.value.replace(/\D/g, ''))} placeholder="Jam" type="number" className="flex-1 rounded-xl border border-gray-200 px-4 py-3 text-sm outline-none font-bold text-center" />
+                <input value={customMinutes} onChange={e => setCustomMinutes(e.target.value.replace(/\D/g, ''))} placeholder="Menit" type="number" className="flex-1 rounded-xl border border-gray-200 px-4 py-3 text-sm outline-none font-bold text-center" />
+              </div>
+            )}
+          </div>
+        </div>
+
+        <motion.button whileTap={{ scale: 0.97 }}
+          onClick={handleSave} disabled={!selectedMenu}
+          className="mt-6 w-full flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-[#FF6B1A] to-[#FF8C42] py-4 text-white shadow-lg disabled:opacity-50" style={{ fontWeight: 800 }}>
+          <Zap size={18} fill="white" /> Kirim Flash Promo
         </motion.button>
       </motion.div>
     </motion.div>

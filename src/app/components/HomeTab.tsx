@@ -1,6 +1,6 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { motion } from "motion/react";
-import { Search, MapPin, Star, Sparkles, SlidersHorizontal, Bell } from "lucide-react";
+import { Search, MapPin, Star, Sparkles, SlidersHorizontal, Bell, Zap } from "lucide-react";
 import { useStore, fmtRp } from "../store";
 import { EATERIES_BY_CAMPUS } from "../data";
 
@@ -14,9 +14,19 @@ const SERVICE_CATEGORIES = [
 ];
 
 export function HomeTab({ onOpenWallet }: { onOpenWallet: () => void }) {
-  const { user, budget, spent, campus } = useStore();
+  const { user, budget, spent, campus, flashPromos } = useStore();
   const [searchQuery, setSearchQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
+  const [now, setNow] = useState(Date.now());
+
+  useEffect(() => {
+    const timer = setInterval(() => setNow(Date.now()), 10000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const activeFlashPromos = useMemo(() => {
+    return flashPromos.filter(p => p.campus === campus && new Date(p.endTime).getTime() > now);
+  }, [flashPromos, campus, now]);
 
   const remaining = budget - spent;
   const eateries = EATERIES_BY_CAMPUS[campus] || [];
@@ -87,6 +97,40 @@ export function HomeTab({ onOpenWallet }: { onOpenWallet: () => void }) {
           <ChevronRight size={20} className="text-gray-400" />
         </button>
       </div>
+
+      {/* Flash Promos */}
+      {activeFlashPromos.length > 0 && (
+        <div className="px-6 mb-6">
+          <div className="flex items-center gap-2 mb-3">
+            <Zap size={20} className="text-[#FF6B1A] fill-[#FF6B1A]" />
+            <h2 className="text-lg font-bold text-gray-900">Flash Promo di Sekitarmu!</h2>
+          </div>
+          <div className="flex flex-col gap-3">
+            {activeFlashPromos.map(promo => {
+              const endsIn = Math.max(0, new Date(promo.endTime).getTime() - now);
+              const hrs = Math.floor(endsIn / 3600000);
+              const mins = Math.floor((endsIn % 3600000) / 60000);
+              return (
+                <div key={promo.id} className="bg-gradient-to-r from-orange-500 to-[#FF6B1A] rounded-2xl p-4 text-white shadow-lg shadow-orange-500/20 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center text-2xl">{promo.merchantEmoji}</div>
+                    <div>
+                      <div className="font-bold text-sm">{promo.merchantName}</div>
+                      <div className="text-xs font-medium opacity-90 mt-0.5">Spesial: {promo.menuEmoji} {promo.menuName}</div>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-[10px] font-bold uppercase opacity-80">Berakhir dalam</div>
+                    <div className="text-sm font-bold bg-black/20 px-2 py-1 rounded-lg mt-1 inline-block">
+                      {hrs > 0 ? `${hrs}j ` : ''}{mins}m
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {/* Search Bar */}
       <div className="px-6 mb-8 flex gap-3">
