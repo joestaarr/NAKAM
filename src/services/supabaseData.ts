@@ -247,6 +247,7 @@ export async function fetchTransactions(userId: string): Promise<Transaction[] |
       items: t.items || [],
       amount: t.amount,
       date: formatRelativeTime(t.created_at),
+      timestamp: t.created_at,
       emoji: t.emoji || "🍽️",
     }));
   } catch {

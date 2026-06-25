@@ -15,6 +15,7 @@ export type Transaction = {
   items: string[];
   amount: number;
   date: string;
+  timestamp?: string;
   emoji: string;
 };
 
@@ -78,7 +79,7 @@ type Store = {
   setGlobalPromo: (v: string) => void;
   flashPromos: FlashPromo[];
   addFlashPromo: (p: Omit<FlashPromo, "id">) => void;
-  addExpense: (t: Omit<Transaction, "id" | "date">) => void;
+  addExpense: (t: Omit<Transaction, "id" | "date" | "timestamp">) => void;
   transactions: Transaction[];
   hideBalance: boolean;
   toggleHideBalance: () => void;
@@ -411,11 +412,12 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   // ─── Transactions ───
   const spent = transactions.reduce((s, t) => s + t.amount, 0);
 
-  const addExpense = (t: Omit<Transaction, "id" | "date">) => {
+  const addExpense = (t: Omit<Transaction, "id" | "date" | "timestamp">) => {
     const newTx: Transaction = {
       ...t,
       id: Math.random().toString(),
       date: "Baru saja",
+      timestamp: new Date().toISOString(),
     };
     setTransactions((prev) => [newTx, ...prev]);
     if (supabaseUser) {

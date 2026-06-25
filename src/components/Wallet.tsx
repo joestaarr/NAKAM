@@ -20,7 +20,7 @@ const itemAnim = {
 };
 
 export const WalletScreen = memo(function WalletScreen({ onBack }: { onBack: () => void }) {
-  const { budget, spent, transactions, hideBalance, toggleHideBalance, setBudget } = useStore();
+  const { budget, transactions, hideBalance, toggleHideBalance, setBudget } = useStore();
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(String(budget));
   const [tx, setTx] = useState<Transaction | null>(null);
@@ -30,12 +30,45 @@ export const WalletScreen = memo(function WalletScreen({ onBack }: { onBack: () 
   const stickyOpacity = useTransform(scrollY, [120, 200], [0, 1]);
   const stickyY = useTransform(scrollY, [120, 200], [-20, 0]);
 
-  const remaining = Math.max(0, budget - spent);
-  const pct = Math.min(100, (spent / budget) * 100);
+  // Calculate Monthly Metrics
+  const { monthlySpent, chartData } = useMemo(() => {
+    const today = new Date();
+    const currentMonth = today.getMonth();
+    const currentYear = today.getFullYear();
+    
+    const base = [
+      { id: "w1", name: "Minggu 1", val: 0 },
+      { id: "w2", name: "Minggu 2", val: 0 },
+      { id: "w3", name: "Minggu 3", val: 0 },
+      { id: "w4", name: "Minggu 4", val: 0 },
+    ];
+    
+    let mSpent = 0;
+
+    transactions.forEach(t => {
+      let d = t.timestamp ? new Date(t.timestamp) : today;
+      if (d.getMonth() === currentMonth && d.getFullYear() === currentYear) {
+        mSpent += t.amount;
+        const date = d.getDate();
+        if (date <= 7) base[0].val += t.amount;
+        else if (date <= 14) base[1].val += t.amount;
+        else if (date <= 21) base[2].val += t.amount;
+        else base[3].val += t.amount;
+      }
+    });
+    
+    return { monthlySpent: mSpent, chartData: base };
+  }, [transactions]);
+
+  const remaining = Math.max(0, budget - monthlySpent);
+  const pct = Math.min(100, (monthlySpent / budget) * 100);
   const danger = remaining / budget < 0.15;
 
   // Advanced Analytics
   const today = new Date();
+  const passedDays = Math.max(1, today.getDate());
+  const avgDailySpend = Math.floor(monthlySpent / passedDays);
+  
   const lastDayOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
   const daysLeft = Math.max(1, lastDayOfMonth.getDate() - today.getDate() + 1);
   const dailyLimit = Math.floor(remaining / daysLeft);
@@ -43,29 +76,12 @@ export const WalletScreen = memo(function WalletScreen({ onBack }: { onBack: () 
   const categories = useMemo(() => {
     const map = new Map<string, number>();
     transactions.forEach(t => {
-      map.set(t.emoji || '🍽️', (map.get(t.emoji || '🍽️') || 0) + t.amount);
-    });
-    return Array.from(map.entries()).sort((a,b) => b[1] - a[1]).slice(0, 4);
-  }, [transactions]);
-
-  const chartData = useMemo(() => {
-    if (transactions.length === 0) {
-      return [
-        { id: "d1", name: "Sen", val: 0 }, { id: "d2", name: "Sel", val: 0 }, { id: "d3", name: "Rab", val: 0 },
-        { id: "d4", name: "Kam", val: 0 }, { id: "d5", name: "Jum", val: 0 }, { id: "d6", name: "Sab", val: 0 }, { id: "d7", name: "Min", val: 0 }
-      ];
-    }
-    const base = [
-      { id: "b1", name: "H-6", val: 0 }, { id: "b2", name: "H-5", val: 0 }, { id: "b3", name: "H-4", val: 0 },
-      { id: "b4", name: "H-3", val: 0 }, { id: "b5", name: "H-2", val: 0 }, { id: "b6", name: "H-1", val: 0 }, { id: "b7", name: "Hr Ini", val: 0 }
-    ];
-    transactions.slice(0, 20).forEach((t, i) => {
-      const idx = 6 - (i % 7);
-      if (idx >= 0 && idx < 7) {
-        base[idx].val += t.amount;
+      const d = t.timestamp ? new Date(t.timestamp) : today;
+      if (d.getMonth() === today.getMonth() && d.getFullYear() === today.getFullYear()) {
+        map.set(t.emoji || '🍽️', (map.get(t.emoji || '🍽️') || 0) + t.amount);
       }
     });
-    return base;
+    return Array.from(map.entries()).sort((a,b) => b[1] - a[1]).slice(0, 4);
   }, [transactions]);
 
   return (
@@ -129,34 +145,46 @@ export const WalletScreen = memo(function WalletScreen({ onBack }: { onBack: () 
             {/* Daily Limit & Advanced Stats */}
             <motion.div variants={itemAnim} className="grid grid-cols-2 gap-3 mt-12">
               <div className="rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur-xl relative overflow-hidden group">
-                <div className="absolute top-0 right-0 p-3 opacity-20 group-hover:scale-110 transition-transform"><Calendar size={32} /></div>
-                <div className="text-xs text-white/60">Jatah Harian</div>
-                <div className="mt-1 text-lg text-emerald-400" style={{fontWeight:800}}>{hideBalance ? "Rp ••••" : fmtRp(dailyLimit)}</div>
-                <div className="text-[10px] text-white/40 mt-1">Sisa {daysLeft} hari lagi</div>
+                <div className="absolute -right-2 -top-2 p-3 opacity-10 group-hover:scale-125 group-hover:rotate-12 transition-all duration-500"><Calendar size={56} /></div>
+                <div className="text-xs text-white/60 relative z-10">Jatah Harian</div>
+                <div className="mt-1 text-lg text-emerald-400 relative z-10" style={{fontWeight:800}}>{hideBalance ? "Rp ••••" : fmtRp(dailyLimit)}</div>
+                <div className="text-[10px] text-white/40 mt-1 relative z-10">Sisa {daysLeft} hari lagi</div>
               </div>
               <div className="rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur-xl relative overflow-hidden group">
-                <div className="absolute top-0 right-0 p-3 opacity-20 group-hover:scale-110 transition-transform"><Target size={32} /></div>
-                <div className="text-xs text-white/60">Target Bulanan</div>
-                <div className="mt-1 text-lg text-[#FF8C42]" style={{fontWeight:800}}>{hideBalance ? "Rp ••••" : fmtRp(budget)}</div>
-                <button onClick={() => { setDraft(String(budget)); setEditing(true); }} className="text-[10px] text-[#FF6B1A] mt-1 flex items-center gap-1"><Edit3 size={10}/> Edit Target</button>
+                <div className="absolute -right-2 -top-2 p-3 opacity-10 group-hover:scale-125 group-hover:rotate-12 transition-all duration-500"><Target size={56} /></div>
+                <div className="text-xs text-white/60 relative z-10">Target Bulanan</div>
+                <div className="mt-1 text-lg text-[#FF8C42] relative z-10" style={{fontWeight:800}}>{hideBalance ? "Rp ••••" : fmtRp(budget)}</div>
+                <button onClick={() => { setDraft(String(budget)); setEditing(true); }} className="text-[10px] text-[#FF6B1A] mt-1 flex items-center gap-1 relative z-10 hover:text-white transition-colors"><Edit3 size={10}/> Edit Target</button>
+              </div>
+              <div className="col-span-2 rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur-xl relative overflow-hidden group">
+                <div className="absolute -right-4 top-1/2 -translate-y-1/2 p-3 opacity-5 group-hover:scale-110 transition-all duration-500"><TrendingDown size={80} /></div>
+                <div className="flex justify-between items-center relative z-10">
+                  <div>
+                    <div className="text-xs text-white/60">Rata-rata Pengeluaran Harian</div>
+                    <div className="mt-1 text-base text-white/90" style={{fontWeight:700}}>{hideBalance ? "Rp ••••" : fmtRp(avgDailySpend)}</div>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-[10px] text-white/40">Selama {passedDays} hari</div>
+                  </div>
+                </div>
               </div>
             </motion.div>
 
             {/* Categories Breakdown */}
             {categories.length > 0 && (
               <motion.div variants={itemAnim} className="rounded-3xl border border-white/10 bg-white/5 p-5 backdrop-blur-xl">
-                <h3 className="mb-4 text-sm flex items-center gap-2" style={{fontWeight:700}}><Wallet size={16} className="text-[#FF6B1A]"/> Pengeluaran Terbesar</h3>
-                <div className="space-y-3">
+                <h3 className="mb-4 text-sm flex items-center gap-2" style={{fontWeight:700}}><Wallet size={16} className="text-[#FF6B1A]"/> Pengeluaran Terbesar Bulan Ini</h3>
+                <div className="space-y-4">
                   {categories.map(([emo, amount]) => {
-                    const w = Math.max(10, (amount / spent) * 100);
+                    const w = Math.max(5, (amount / monthlySpent) * 100);
                     return (
-                      <div key={emo}>
-                        <div className="flex justify-between text-xs mb-1">
-                          <span className="flex items-center gap-1.5"><span className="text-sm">{emo}</span> Kategori {emo}</span>
-                          <span style={{fontWeight:700}}>{hideBalance ? "Rp ••••" : fmtRp(amount)}</span>
+                      <div key={emo} className="group cursor-default">
+                        <div className="flex justify-between text-xs mb-1.5">
+                          <span className="flex items-center gap-2 text-white/80 group-hover:text-white transition-colors"><span className="text-sm bg-white/10 p-1 rounded-lg">{emo}</span> Kategori {emo}</span>
+                          <span style={{fontWeight:700}} className="text-white/90 group-hover:text-white">{hideBalance ? "Rp ••••" : fmtRp(amount)}</span>
                         </div>
-                        <div className="h-1.5 w-full rounded-full bg-white/10 overflow-hidden">
-                          <motion.div initial={{ width: 0 }} animate={{ width: `${w}%` }} transition={{ duration: 1, ease: "easeOut" }} className="h-full bg-gradient-to-r from-[#FF6B1A] to-[#FF8C42]" />
+                        <div className="h-2 w-full rounded-full bg-white/5 overflow-hidden">
+                          <motion.div initial={{ width: 0 }} whileInView={{ width: `${w}%` }} viewport={{ once: true }} transition={{ duration: 1.5, ease: "easeOut", delay: 0.2 }} className="h-full bg-gradient-to-r from-[#FF6B1A] to-[#FF8C42]" />
                         </div>
                       </div>
                     );
@@ -166,11 +194,12 @@ export const WalletScreen = memo(function WalletScreen({ onBack }: { onBack: () 
             )}
 
             {/* Bar chart */}
-            <motion.div variants={itemAnim} className="rounded-3xl border border-white/10 bg-white/5 p-5 backdrop-blur-xl">
-              <div className="flex items-center justify-between mb-4">
+            <motion.div variants={itemAnim} className="rounded-3xl border border-white/10 bg-white/5 p-5 backdrop-blur-xl relative overflow-hidden">
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-[#FF6B1A]/5 blur-[80px] pointer-events-none rounded-full" />
+              <div className="flex items-center justify-between mb-4 relative z-10">
                 <div>
-                  <div className="text-xs text-white/60">Total Pengeluaran</div>
-                  <div className="text-xl" style={{fontWeight:800}}>{hideBalance ? "Rp ••••" : fmtRp(spent)}</div>
+                  <div className="text-xs text-white/60">Total Pengeluaran Bulan Ini</div>
+                  <div className="text-xl" style={{fontWeight:800}}>{hideBalance ? "Rp ••••" : fmtRp(monthlySpent)}</div>
                 </div>
                 <div className="h-10 w-10 rounded-xl bg-white/5 flex items-center justify-center text-[#FF6B1A]"><TrendingDown size={18}/></div>
               </div>
@@ -184,9 +213,10 @@ export const WalletScreen = memo(function WalletScreen({ onBack }: { onBack: () 
                     />
                     <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: "rgba(255,255,255,0.5)", fontSize: 10, fontWeight: 600 }} dy={10} />
                     <Bar dataKey="val" radius={[8, 8, 8, 8]}>
-                      {chartData.map((entry, index) => (
-                        <Cell key={entry.id} fill={index === chartData.length - 1 ? "#FF6B1A" : "rgba(255,255,255,0.2)"} />
-                      ))}
+                      {chartData.map((entry, index) => {
+                        const currentWeekIdx = Math.min(3, Math.floor((new Date().getDate() - 1) / 7));
+                        return <Cell key={entry.id} fill={index === currentWeekIdx ? "#FF6B1A" : "rgba(255,255,255,0.2)"} />;
+                      })}
                     </Bar>
                   </BarChart>
                 </ResponsiveContainer>
