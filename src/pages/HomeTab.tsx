@@ -394,7 +394,14 @@ export const HomeTab = memo(function HomeTab({ onOpenWallet, onNavigateToEatery 
               const hrs = Math.floor(endsIn / 3600000);
               const mins = Math.floor((endsIn % 3600000) / 60000);
               return (
-                <div key={promo.id} className="min-w-[260px] flex-shrink-0 bg-gradient-to-br from-orange-500 to-rose-500 rounded-2xl p-4 text-white shadow-lg shadow-orange-500/20">
+                <button
+                  key={promo.id}
+                  onClick={() => {
+                    const matchedEatery = eateries.find((e) => e.name === promo.merchantName);
+                    if (matchedEatery && onNavigateToEatery) onNavigateToEatery(matchedEatery);
+                  }}
+                  className="min-w-[260px] text-left flex-shrink-0 bg-gradient-to-br from-orange-500 to-rose-500 rounded-2xl p-4 text-white shadow-lg shadow-orange-500/20 active:scale-[0.98] transition-transform"
+                >
                   <div className="flex items-center gap-3 mb-3">
                     <div className="w-11 h-11 bg-white/20 rounded-2xl flex items-center justify-center text-xl backdrop-blur-sm">{promo.merchantEmoji}</div>
                     <div>
@@ -409,7 +416,7 @@ export const HomeTab = memo(function HomeTab({ onOpenWallet, onNavigateToEatery 
                     </div>
                     <BadgePercent size={20} className="opacity-60" />
                   </div>
-                </div>
+                </button>
               );
             })}
           </div>
@@ -503,15 +510,19 @@ export const HomeTab = memo(function HomeTab({ onOpenWallet, onNavigateToEatery 
             <div className="w-6 h-6 rounded-lg bg-violet-100 text-violet-600 flex items-center justify-center">
               <Sparkles size={12} />
             </div>
-            <h2 className="text-base font-bold text-gray-900">Rekomendasi Untukmu</h2>
+            <h2 className="text-base font-bold text-gray-900 dark:text-white">Rekomendasi Untukmu</h2>
           </div>
         </div>
         <div className="flex gap-3 overflow-x-auto px-6 pb-3 no-scrollbar">
           {recommended.map((e) => (
-            <div key={e.id} className="w-[150px] flex-shrink-0 bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm">
+            <button
+              key={e.id}
+              onClick={() => onNavigateToEatery?.(e)}
+              className="w-[150px] flex-shrink-0 bg-white dark:bg-white/5 rounded-2xl overflow-hidden border border-gray-100 dark:border-white/10 shadow-sm text-left active:scale-[0.98] transition-transform"
+            >
               <div className="relative h-[100px]">
                 <img src={e.image} alt={e.name} className="w-full h-full object-cover" />
-                <div className="absolute top-2 left-2 bg-white/90 backdrop-blur-sm text-[10px] font-bold text-gray-800 px-2 py-0.5 rounded-lg flex items-center gap-1">
+                <div className="absolute top-2 left-2 bg-white/90 dark:bg-black/60 backdrop-blur-sm text-[10px] font-bold text-gray-800 dark:text-white px-2 py-0.5 rounded-lg flex items-center gap-1">
                   <Star size={10} fill="#FFB347" className="text-[#FFB347]" /> {(e.dominance ? e.dominance / 20 : 4.5).toFixed(1)}
                 </div>
                 {e.isMine && (
@@ -519,58 +530,53 @@ export const HomeTab = memo(function HomeTab({ onOpenWallet, onNavigateToEatery 
                 )}
               </div>
               <div className="p-3">
-                <h4 className="text-sm font-bold text-gray-900 leading-tight truncate">{e.name}</h4>
-                <div className="flex items-center gap-1 mt-1 text-[10px] text-gray-500 font-medium">
+                <h4 className="text-sm font-bold text-gray-900 dark:text-white leading-tight truncate">{e.name}</h4>
+                <div className="flex items-center gap-1 mt-1 text-[10px] text-gray-500 dark:text-gray-400 font-medium">
                   <MapPin size={10} className="text-gray-400" />
                   <span className="truncate">{e.walk}</span>
                 </div>
                 <div className="text-[10px] font-bold text-[#FF6B1A] mt-1">{e.price}</div>
               </div>
-            </div>
+            </button>
           ))}
         </div>
       </div>
 
-      {/* ═══════════ POPULER MINGGU INI ═══════════ */}
-      <div className="mb-6">
-        <div className="px-6 flex items-center justify-between mb-3">
-          <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded-lg bg-red-100 text-red-500 flex items-center justify-center">
-              <Flame size={12} />
+      {/* ═══════════ EKSPLORASI (NEW) ═══════════ */}
+      {!searchQuery && !activeCategory && (
+        <div className="mb-6 px-6">
+          <div className="flex items-center gap-2 mb-4">
+            <div className="w-6 h-6 rounded-lg bg-pink-100 dark:bg-pink-500/20 text-pink-500 flex items-center justify-center">
+              <Store size={12} />
             </div>
-            <h2 className="text-base font-bold text-gray-900">Populer Minggu Ini</h2>
+            <h2 className="text-base font-bold text-gray-900 dark:text-white">Eksplor Lebih Banyak</h2>
           </div>
-        </div>
-        <div className="flex gap-4 overflow-x-auto px-6 pb-4 no-scrollbar snap-x">
-          {popular.map((e, idx) => (
-            <div key={e.id} className="w-[200px] flex-shrink-0 snap-start">
-              <div className="relative h-[250px] rounded-3xl overflow-hidden shadow-sm group">
-                <img src={e.image} alt={e.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-
-                {/* Ranking badge */}
-                <div className="absolute top-3 left-3 w-8 h-8 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center text-sm font-black text-gray-800 shadow-sm">
-                  {idx + 1}
-                </div>
-
-                <div className="absolute top-3 right-3 bg-[#FFB347] text-white text-[10px] font-bold px-2 py-1 rounded-lg flex items-center gap-1 shadow-sm">
-                  <Star size={10} fill="currentColor" /> {(e.dominance ? e.dominance / 20 : 4.5).toFixed(1)}
-                </div>
-
-                <div className="absolute bottom-4 left-4 right-4">
-                  <h3 className="text-white font-bold text-base leading-tight mb-1">{e.name}</h3>
-                  <div className="flex items-center justify-between">
-                    <div className="text-white/70 text-[11px] font-medium">{e.price}</div>
-                    <div className="text-white/70 text-[11px] font-medium flex items-center gap-1">
-                      <MapPin size={10} /> {e.walk}
-                    </div>
+          <div className="grid grid-cols-2 gap-3">
+            {eateries.slice(0, 10).map((e) => (
+              <button
+                key={`explore-${e.id}`}
+                onClick={() => onNavigateToEatery?.(e)}
+                className="flex flex-col text-left bg-white dark:bg-white/5 rounded-2xl overflow-hidden shadow-sm border border-gray-100 dark:border-white/10 active:scale-[0.98] transition-transform"
+              >
+                <div className="relative h-28 w-full">
+                  <img src={e.image} alt={e.name} className="w-full h-full object-cover" />
+                  <div className="absolute top-2 right-2 bg-white/90 dark:bg-black/60 backdrop-blur-sm text-[10px] font-bold text-gray-800 dark:text-white px-1.5 py-0.5 rounded-lg flex items-center gap-1">
+                    <Star size={10} fill="#FFB347" className="text-[#FFB347]" /> {(e.dominance ? e.dominance / 20 : 4.5).toFixed(1)}
                   </div>
                 </div>
-              </div>
-            </div>
-          ))}
+                <div className="p-3">
+                  <h4 className="text-sm font-bold text-gray-900 dark:text-white leading-tight line-clamp-1">{e.name}</h4>
+                  <div className="text-[10px] font-bold text-[#FF6B1A] mt-1">{e.price}</div>
+                  <div className="flex items-center gap-1 mt-1 text-[10px] text-gray-500 dark:text-gray-400 font-medium">
+                    <MapPin size={10} className="text-gray-400" />
+                    <span className="truncate">{e.walk}</span>
+                  </div>
+                </div>
+              </button>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* ═══════════ ALL EATERIES LIST ═══════════ */}
       {(searchQuery || activeCategory) && (
@@ -587,24 +593,25 @@ export const HomeTab = memo(function HomeTab({ onOpenWallet, onNavigateToEatery 
           ) : (
             <div className="space-y-3">
               {eateries.map((e) => (
-                <div
-                  key={e.id}
-                  className="flex gap-3 p-3 bg-white rounded-2xl border border-gray-100 shadow-sm active:scale-[0.98] transition-transform"
+                <button
+                  key={`search-${e.id}`}
+                  onClick={() => onNavigateToEatery?.(e)}
+                  className="w-full text-left flex gap-3 p-3 bg-white dark:bg-white/5 rounded-2xl border border-gray-100 dark:border-white/10 shadow-sm active:scale-[0.98] transition-transform"
                 >
                   <img src={e.image} alt={e.name} className="w-[72px] h-[72px] rounded-xl object-cover" />
                   <div className="flex-1 py-0.5 flex flex-col justify-center">
                     <div className="flex justify-between items-start mb-0.5">
-                      <h4 className="text-sm font-bold text-gray-900 leading-tight">{e.name}</h4>
+                      <h4 className="text-sm font-bold text-gray-900 dark:text-white leading-tight">{e.name}</h4>
                       <div className="flex items-center gap-1 text-[#FFB347] font-bold text-xs">
                         <Star size={12} fill="currentColor" /> {(e.dominance ? e.dominance / 20 : 4.5).toFixed(1)}
                       </div>
                     </div>
-                    <div className="flex items-center gap-1 text-[11px] text-gray-500 font-medium">
+                    <div className="flex items-center gap-1 text-[11px] text-gray-500 dark:text-gray-400 font-medium">
                       <MapPin size={11} className="text-gray-400" />
                       <span className="truncate">{e.price} • {e.walk}</span>
                     </div>
                   </div>
-                </div>
+                </button>
               ))}
             </div>
           )}
