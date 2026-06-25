@@ -439,6 +439,54 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     setNotifications(prev => prev.map(notif => ({ ...notif, read: true })));
   };
 
+  // ─── Realtime Promos Sync ───
+  useEffect(() => {
+    if (!supabase) return;
+    const channel = supabase.channel("public-promos");
+    
+    channel.on("broadcast", { event: "new_flash_promo" }, (payload) => {
+      const p = payload.payload;
+      setFlashPromos((prev) => {
+        if (prev.find((x) => x.id === p.id)) return prev;
+        return [p, ...prev];
+      });
+      setNotifications((prev) => [
+        {
+          id: Date.now().toString(),
+          type: "flash_promo",
+          title: `⚡ Promo dari ${p.merchantName}`,
+          message: `Diskon spesial untuk ${p.menuName} sedang berlangsung! Cepat sikat sebelum kehabisan!`,
+          time: new Date().toISOString(),
+          read: false
+        },
+        ...prev
+      ]);
+    });
+
+    channel.on("broadcast", { event: "new_global_promo" }, (payload) => {
+      const v = payload.payload.message;
+      setGlobalPromoState(v);
+      if (v) {
+        setNotifications((prev) => [
+          {
+            id: Date.now().toString(),
+            type: "broadcast",
+            title: "📢 Broadcast Spesial!",
+            message: v,
+            time: new Date().toISOString(),
+            read: false
+          },
+          ...prev
+        ]);
+      }
+    });
+
+    channel.subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
+
   const setGlobalPromo = (v: string) => {
     setGlobalPromoState(v);
     if (v) {
@@ -447,6 +495,13 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         title: "📢 Broadcast Spesial!",
         message: v
       });
+    }
+    if (supabase) {
+      supabase.channel("public-promos").send({
+        type: "broadcast",
+        event: "new_global_promo",
+        payload: { message: v }
+      }).catch(console.error);
     }
   };
 
@@ -459,6 +514,14 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       title: `⚡ Promo dari ${p.merchantName}`,
       message: `Diskon spesial untuk ${p.menuName} sedang berlangsung! Cepat sikat sebelum kehabisan!`
     });
+
+    if (supabase) {
+      supabase.channel("public-promos").send({
+        type: "broadcast",
+        event: "new_flash_promo",
+        payload: promo
+      }).catch(console.error);
+    }
 
     if ("Notification" in window) {
       const showNotif = () => {
