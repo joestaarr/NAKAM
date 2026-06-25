@@ -7,6 +7,7 @@ import { FilterModal } from "@/components/FilterModal";
 import type { FilterOptions } from "@/components/FilterModal";
 import { TerserahRoulette } from "@/components/TerserahRoulette";
 import { AnimatePresence } from "motion/react";
+import { fetchEateriesFromSupabase } from "@/services/supabaseData";
 
 const SERVICE_CATEGORIES = [
   { id: "aneka_nasi", label: "Aneka Nasi", filterKey: "nasi" },
@@ -23,14 +24,24 @@ const SERVICE_CATEGORIES = [
   { id: "korea", label: "Korea", filterKey: "korea" },
 ];
 
-export const HomeTab = memo(function HomeTab({ onOpenWallet }: { onOpenWallet: () => void }) {
-  const { user, budget, spent, campus, flashPromos } = useStore();
+export const HomeTab = memo(function HomeTab({ onOpenWallet, onNavigateToEatery }: { onOpenWallet: () => void, onNavigateToEatery?: (eatery: any) => void }) {
+  const { user, budget, spent, campus, flashPromos, merchant } = useStore();
   const [searchQuery, setSearchQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [now, setNow] = useState(Date.now());
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [isTerserahOpen, setIsTerserahOpen] = useState(false);
   const [filters, setFilters] = useState<FilterOptions>({ categories: [], minRating: 0, priceRange: "any" });
+  const [supabaseEateries, setSupabaseEateries] = useState<any[] | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetchEateriesFromSupabase(campus).then((data) => {
+      if (!cancelled && data && data.length > 0) setSupabaseEateries(data);
+      else if (!cancelled) setSupabaseEateries(null);
+    });
+    return () => { cancelled = true; };
+  }, [campus]);
 
   useEffect(() => {
     const timer = setInterval(() => setNow(Date.now()), 10000);
@@ -42,7 +53,12 @@ export const HomeTab = memo(function HomeTab({ onOpenWallet }: { onOpenWallet: (
   }, [flashPromos, campus, now]);
 
   const remaining = budget - spent;
-  let eateries = EATERIES_BY_CAMPUS[campus] || [];
+  let eateries = [
+    ...(merchant.onboarded && merchant.campus === campus ? [{
+      id: "merchant-self", name: merchant.name, image: "https://images.unsplash.com/photo-1552566626-52f8b828add9?w=800", walk: "kamu", dominance: 50, price: merchant.price, lat: merchant.lat, lng: merchant.lng, isMine: true, emoji: merchant.emoji, rating: "Baru", menu: merchant.menu
+    }] : []),
+    ...(supabaseEateries || EATERIES_BY_CAMPUS[campus] || [])
+  ];
 
   if (searchQuery) {
     const q = searchQuery.toLowerCase();
@@ -188,7 +204,7 @@ export const HomeTab = memo(function HomeTab({ onOpenWallet }: { onOpenWallet: (
             </div>
             <div className="text-left">
               <div className="font-black tracking-tight text-lg leading-none mb-1">BINGUNG MAKAN?</div>
-              <div className="text-xs text-gray-400 font-medium">Biar takdir yang memilih (CS2 Style)</div>
+              <div className="text-xs text-gray-400 font-medium">Biar takdir yang memilih</div>
             </div>
           </div>
           <div className="w-10 h-10 rounded-full bg-white/10 text-white flex items-center justify-center relative z-10 group-hover:bg-white group-hover:text-black transition-colors">
@@ -275,11 +291,11 @@ export const HomeTab = memo(function HomeTab({ onOpenWallet }: { onOpenWallet: (
 
       <TerserahRoulette
         isOpen={isTerserahOpen}
-        eateries={EATERIES_BY_CAMPUS[campus] || []}
+        eateries={eateries}
         onClose={() => setIsTerserahOpen(false)}
         onAccept={(eatery) => {
           setIsTerserahOpen(false);
-          // Optional: handle routing to eatery or showing detail
+          if (onNavigateToEatery) onNavigateToEatery(eatery);
         }}
       />
     </div>

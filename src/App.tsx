@@ -20,6 +20,7 @@ type TabId = "home" | "restaurants" | "history" | "profile";
 function Inner() {
   const [phase, setPhase] = useState<Phase>("splash");
   const [activeTab, setActiveTab] = useState<TabId>("home");
+  const [routeTarget, setRouteTarget] = useState<any>(null);
   const [walletOpen, setWalletOpen] = useState(false);
   const [merchantOpen, setMerchantOpen] = useState(false);
   const [adminOpen, setAdminOpen] = useState(false);
@@ -70,12 +71,21 @@ function Inner() {
                 <AnimatePresence mode="wait">
                   {activeTab === "home" && (
                     <motion.div key="home" className="absolute inset-0 overflow-y-auto no-scrollbar" initial={{opacity:0, y:10}} animate={{opacity:1, y:0}} exit={{opacity:0, y:-10}}>
-                      <HomeTab onOpenWallet={handleOpenWallet} />
+                      <HomeTab 
+                        onOpenWallet={handleOpenWallet}
+                        onNavigateToEatery={(eatery) => {
+                          setRouteTarget(eatery);
+                          setActiveTab("restaurants");
+                        }} 
+                      />
                     </motion.div>
                   )}
                   {activeTab === "restaurants" && (
                     <motion.div key="restaurants" className="absolute inset-0 overflow-y-auto no-scrollbar" initial={{opacity:0, y:10}} animate={{opacity:1, y:0}} exit={{opacity:0, y:-10}}>
-                      <RestaurantsTab />
+                      <RestaurantsTab 
+                        initialRouteTarget={routeTarget}
+                        onClearRouteTarget={() => setRouteTarget(null)}
+                      />
                     </motion.div>
                   )}
                   {activeTab === "history" && (

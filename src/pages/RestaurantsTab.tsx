@@ -53,7 +53,7 @@ const CAMPUSES = [
   { code: "UM", name: "Universitas Negeri Malang", students: "25k+" },
 ];
 
-export const RestaurantsTab = memo(function RestaurantsTab() {
+export const RestaurantsTab = memo(function RestaurantsTab({ initialRouteTarget, onClearRouteTarget }: { initialRouteTarget?: any, onClearRouteTarget?: () => void }) {
   const [selected, setSelected] = useState<any>(null);
   const [campusOpen, setCampusOpen] = useState(false);
   const [campusLoading, setCampusLoading] = useState(false);
@@ -93,6 +93,13 @@ export const RestaurantsTab = memo(function RestaurantsTab() {
     });
     return () => { cancelled = true; };
   }, [campus]);
+
+  useEffect(() => {
+    if (initialRouteTarget) {
+      setNavTarget(initialRouteTarget);
+      if (onClearRouteTarget) onClearRouteTarget();
+    }
+  }, [initialRouteTarget, onClearRouteTarget]);
 
   // Routing Effect
   useEffect(() => {
