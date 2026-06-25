@@ -45,7 +45,12 @@ export const HomeTab = memo(function HomeTab({ onOpenWallet }: { onOpenWallet: (
   let eateries = EATERIES_BY_CAMPUS[campus] || [];
 
   if (searchQuery) {
-    eateries = eateries.filter(e => e.name.toLowerCase().includes(searchQuery.toLowerCase()));
+    const q = searchQuery.toLowerCase();
+    eateries = eateries.filter(e => {
+      if (e.name.toLowerCase().includes(q)) return true;
+      if (e.menu && e.menu.some((m: any) => m.name.toLowerCase().includes(q))) return true;
+      return false;
+    });
   }
   if (filters.minRating > 0) {
     eateries = eateries.filter(e => (e.dominance ? e.dominance / 20 : 4.5) >= filters.minRating);

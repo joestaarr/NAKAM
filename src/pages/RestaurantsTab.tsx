@@ -144,7 +144,8 @@ export const RestaurantsTab = memo(function RestaurantsTab() {
     lng: merchant.lng,
     isMine: true,
     emoji: merchant.emoji,
-    rating: "Baru"
+    rating: "Baru",
+    menu: merchant.menu,
   } : null;
 
   let eateries = [
@@ -153,7 +154,12 @@ export const RestaurantsTab = memo(function RestaurantsTab() {
   ];
 
   if (searchQuery) {
-    eateries = eateries.filter(e => e.name.toLowerCase().includes(searchQuery.toLowerCase()));
+    const q = searchQuery.toLowerCase();
+    eateries = eateries.filter(e => {
+      if (e.name.toLowerCase().includes(q)) return true;
+      if (e.menu && e.menu.some((m: any) => m.name.toLowerCase().includes(q))) return true;
+      return false;
+    });
   }
   
   if (filters.minRating > 0) {
