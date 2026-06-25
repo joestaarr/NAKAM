@@ -20,17 +20,25 @@ export function TerserahRoulette({
   const [rouletteItems, setRouletteItems] = useState<any[]>([]);
   const ITEM_WIDTH = 160; // 144px width + 16px gap
   
+  const hasInitialized = useRef(false);
+
   useEffect(() => {
-    if (isOpen && eateries.length > 0) {
+    if (!isOpen) {
+      hasInitialized.current = false;
+      return;
+    }
+    if (isOpen && eateries.length > 0 && !hasInitialized.current) {
+      hasInitialized.current = true;
       setIsSpinning(false);
       setWinner(null);
+      setXPos(0);
       
-      // Generate a pool of ~50 items for the spin
-      const pool = [];
-      for (let i = 0; i < 50; i++) {
-        pool.push(eateries[Math.floor(Math.random() * eateries.length)]);
+      let pool: any[] = [];
+      while (pool.length < 60) {
+        const shuffled = [...eateries].sort(() => Math.random() - 0.5);
+        pool = [...pool, ...shuffled];
       }
-      setRouletteItems(pool);
+      setRouletteItems(pool.slice(0, 60));
     }
   }, [isOpen, eateries]);
 
@@ -68,11 +76,12 @@ export function TerserahRoulette({
     setIsSpinning(true);
     setWinner(null);
     
-    // Shuffle pool again just in case
-    const pool = [];
-    for (let i = 0; i < 60; i++) {
-      pool.push(eateries[Math.floor(Math.random() * eateries.length)]);
+    let pool: any[] = [];
+    while (pool.length < 60) {
+      const shuffled = [...eateries].sort(() => Math.random() - 0.5);
+      pool = [...pool, ...shuffled];
     }
+    pool = pool.slice(0, 60);
     setRouletteItems(pool);
 
     const winIndex = Math.floor(Math.random() * 15) + 40; // 40 to 55
