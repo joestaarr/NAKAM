@@ -86,7 +86,7 @@ function getMealSuggestion(): string {
   return "🦉 Ngemil malam-malam nih?";
 }
 
-export const HomeTab = memo(function HomeTab({ onOpenWallet, onNavigateToEatery }: { onOpenWallet: () => void; onNavigateToEatery?: (eatery: any) => void }) {
+export const HomeTab = memo(function HomeTab({ onOpenWallet, onNavigateToEatery, onSeeAllRestaurants }: { onOpenWallet: () => void; onNavigateToEatery?: (eatery: any) => void; onSeeAllRestaurants?: () => void }) {
   const { user, budget, spent, campus, flashPromos, merchant, transactions } = useStore();
   const [searchQuery, setSearchQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
@@ -247,7 +247,7 @@ export const HomeTab = memo(function HomeTab({ onOpenWallet, onNavigateToEatery 
           <div className="px-2.5 py-1 rounded-full bg-orange-50 dark:bg-orange-500/10 border border-orange-100 dark:border-orange-500/20 text-[10px] font-bold text-[#FF6B1A] flex items-center gap-1">
             <MapPin size={10} /> {campus}
           </div>
-          <button className="relative w-10 h-10 bg-white dark:bg-white/10 rounded-full flex items-center justify-center shadow-sm text-gray-700 dark:text-white border border-gray-100 dark:border-white/10 active:scale-95 transition-transform">
+          <button onClick={() => console.log("Notifikasi dibuka")} className="relative w-10 h-10 bg-white dark:bg-white/10 rounded-full flex items-center justify-center shadow-sm text-gray-700 dark:text-white border border-gray-100 dark:border-white/10 active:scale-95 transition-transform">
             <Bell size={20} />
             {activeFlashPromos.length > 0 && (
               <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-red-500 rounded-full text-[9px] font-bold text-white flex items-center justify-center">{activeFlashPromos.length}</span>
@@ -463,14 +463,18 @@ export const HomeTab = memo(function HomeTab({ onOpenWallet, onNavigateToEatery 
 
       {/* ═══════════ CATEGORIES (Working filter) ═══════════ */}
       <div className="mb-6">
-        <div className="px-6 flex items-center justify-between mb-3">
-          <h2 className="text-base font-bold text-gray-900">Kategori</h2>
-          {activeCategory && (
-            <button onClick={() => setActiveCategory(null)} className="text-xs text-[#FF6B1A] font-bold">
-              Hapus Filter ✕
-            </button>
-          )}
-        </div>
+          <div className="flex items-center gap-2 mb-3 px-6">
+            <h2 className="text-base font-bold text-gray-900 dark:text-white flex-1 tracking-tight">Kategori</h2>
+            {activeCategory ? (
+              <button onClick={() => setActiveCategory(null)} className="text-xs text-[#FF6B1A] font-bold">
+                Clear
+              </button>
+            ) : (
+              <button onClick={onSeeAllRestaurants} className="text-xs font-semibold text-[#FF6B1A] hover:text-[#FF8C42] transition-colors">
+                Lihat Semua
+              </button>
+            )}
+          </div>
         <div className="flex gap-2.5 overflow-x-auto px-6 pb-2 no-scrollbar">
           {SERVICE_CATEGORIES.map((cat) => {
             const isActive = activeCategory === cat.id;

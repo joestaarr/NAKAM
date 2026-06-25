@@ -53,7 +53,7 @@ const CAMPUSES = [
   { code: "UM", name: "Universitas Negeri Malang", students: "25k+" },
 ];
 
-export const RestaurantsTab = memo(function RestaurantsTab({ initialRouteTarget, onClearRouteTarget }: { initialRouteTarget?: any, onClearRouteTarget?: () => void }) {
+export const RestaurantsTab = memo(function RestaurantsTab({ initialRouteTarget, onClearRouteTarget, onBack }: { initialRouteTarget?: any, onClearRouteTarget?: () => void, onBack?: () => void }) {
   const [selected, setSelected] = useState<any>(null);
   const [campusOpen, setCampusOpen] = useState(false);
   const [campusLoading, setCampusLoading] = useState(false);
@@ -218,11 +218,11 @@ export const RestaurantsTab = memo(function RestaurantsTab({ initialRouteTarget,
       {!isNavMode && (
         <div className="absolute top-0 left-0 right-0 z-20 pt-12 pb-4 px-6 bg-gradient-to-b from-white/90 dark:from-[#0a0e27]/90 to-transparent pointer-events-none">
           <div className="flex items-center justify-between pointer-events-auto">
-            <button className="w-10 h-10 rounded-full bg-white dark:bg-white/5 shadow-sm flex items-center justify-center text-gray-700 dark:text-white hover:bg-gray-50 dark:hover:bg-white/10 border border-gray-100 dark:border-white/10">
+            <button onClick={onBack} className="w-10 h-10 rounded-full bg-white dark:bg-white/5 shadow-sm flex items-center justify-center text-gray-700 dark:text-white hover:bg-gray-50 dark:hover:bg-white/10 border border-gray-100 dark:border-white/10">
               <ChevronLeft size={20} />
             </button>
             <h1 className="text-lg font-bold text-gray-900 dark:text-white tracking-tight">List of restaurants</h1>
-            <button className="w-10 h-10 rounded-full bg-white dark:bg-white/5 shadow-sm flex items-center justify-center text-gray-700 dark:text-white hover:bg-gray-50 dark:hover:bg-white/10 border border-gray-100 dark:border-white/10">
+            <button onClick={() => alert("Fitur Favorit akan segera hadir!")} className="w-10 h-10 rounded-full bg-white dark:bg-white/5 shadow-sm flex items-center justify-center text-gray-700 dark:text-white hover:bg-gray-50 dark:hover:bg-white/10 border border-gray-100 dark:border-white/10">
               <Heart size={20} />
             </button>
           </div>

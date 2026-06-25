@@ -73,6 +73,7 @@ function Inner() {
                     <motion.div key="home" className="absolute inset-0 overflow-y-auto no-scrollbar" initial={{opacity:0, y:10}} animate={{opacity:1, y:0}} exit={{opacity:0, y:-10}}>
                       <HomeTab 
                         onOpenWallet={handleOpenWallet}
+                        onSeeAllRestaurants={() => setActiveTab("restaurants")}
                         onNavigateToEatery={(eatery) => {
                           setRouteTarget(eatery);
                           setActiveTab("restaurants");
@@ -85,6 +86,7 @@ function Inner() {
                       <RestaurantsTab 
                         initialRouteTarget={routeTarget}
                         onClearRouteTarget={() => setRouteTarget(null)}
+                        onBack={() => setActiveTab("home")}
                       />
                     </motion.div>
                   )}

@@ -18,7 +18,7 @@ export const HistoryTab = memo(function HistoryTab() {
       <div className={`px-5 pt-12 pb-4 flex items-center justify-between sticky top-0 z-30 backdrop-blur-xl ${isDark ? "bg-[#0a0e27]/80 border-b border-white/10" : "bg-white/80 border-b border-gray-200"}`}>
         <div className="w-10" />
         <h1 className="text-lg font-extrabold tracking-tight">Riwayat</h1>
-        <button className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors ${isDark ? "bg-white/5 text-white/70 hover:bg-white/10" : "bg-gray-50 text-gray-600 hover:bg-gray-100"}`}>
+        <button onClick={() => alert("Fitur filter tanggal segera hadir!")} className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors ${isDark ? "bg-white/5 text-white/70 hover:bg-white/10" : "bg-gray-50 text-gray-600 hover:bg-gray-100"}`}>
           <Calendar size={18} />
         </button>
       </div>
