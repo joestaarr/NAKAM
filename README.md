@@ -101,44 +101,40 @@ Kesempurnaan aplikasi ini ditopang oleh teknologi modern yang berfokus pada **pe
 
 ---
 
-## 📸 Showcase UI/UX (Holographic Edition)
+## 📸 Showcase UI/UX (Interactive Live Demo)
 
-*Pengalaman antarmuka yang dirancang presisi hingga ke level piksel, menggabungkan fungsionalitas ekstrem dengan estetika kelas dunia.*
+*Berikut adalah rekaman langsung pengalaman antarmuka NAKAM yang dirancang presisi hingga ke level piksel, menggabungkan fungsionalitas ekstrem dengan estetika kelas dunia.*
+
+<div align="center">
+  <img src="file:///C:/Users/hamda/.gemini/antigravity-ide/brain/3d009df7-763c-4ee3-beb4-ef6e1fa230c1/nakam_showcase_1782747924669.webp" alt="Nakam Live Demo" width="350" style="border-radius: 20px; box-shadow: 0 15px 40px rgba(255,107,26,0.3); border: 1px solid rgba(255,255,255,0.1);"/>
+</div>
+
+<br/>
 
 <table align="center" style="border-collapse: collapse; border: none;">
   <tr>
     <td align="center" width="50%" style="border: none; padding: 15px;">
-      <img src="https://placehold.co/400x700/0a0a0a/00FF88/png?text=Smart+Wallet+%26%0AFlash+Promo&font=Montserrat" alt="Dashboard Preview" width="100%" style="border-radius: 16px; box-shadow: 0 10px 30px rgba(0,255,136,0.2);"/>
-      <br/><br/>
       <h3>💳 Smart Wallet & Flash Promo</h3>
       <p>Pemantauan anggaran <i>real-time</i> dan notifikasi promo FOMO instan untuk mahasiswa.</p>
     </td>
     <td align="center" width="50%" style="border: none; padding: 15px;">
-      <img src="https://placehold.co/400x700/0a0a0a/0055FF/png?text=Geospatial%0ARadar&font=Montserrat" alt="Maps Preview" width="100%" style="border-radius: 16px; box-shadow: 0 10px 30px rgba(0,85,255,0.2);"/>
-      <br/><br/>
       <h3>🗺️ Proximity Radar</h3>
       <p>Pemetaan spasial akurat dengan Leaflet untuk kalkulasi jarak warung absolut.</p>
     </td>
   </tr>
   <tr>
     <td align="center" width="50%" style="border: none; padding: 15px;">
-      <br/>
-      <img src="https://placehold.co/400x700/0a0a0a/FF0055/png?text=Auto%0AE-Receipt&font=Montserrat" alt="History Preview" width="100%" style="border-radius: 16px; box-shadow: 0 10px 30px rgba(255,0,85,0.2);"/>
-      <br/><br/>
       <h3>🧾 Auto E-Receipt</h3>
       <p>Rekapitulasi riwayat transaksi hiper-realistis setara aplikasi perbankan modern.</p>
     </td>
     <td align="center" width="50%" style="border: none; padding: 15px;">
-      <br/>
-      <img src="https://placehold.co/400x700/0a0a0a/B73BFE/png?text=Premium%0AGlassmorphism&font=Montserrat" alt="Profile Preview" width="100%" style="border-radius: 16px; box-shadow: 0 10px 30px rgba(183,59,254,0.2);"/>
-      <br/><br/>
       <h3>💎 Premium Glassmorphism</h3>
       <p>Estetika <i>translucency</i> pekat, <i>dark mode</i> absolut, dan efek <i>blur</i> yang elegan.</p>
     </td>
   </tr>
 </table>
 
-> 💡 **PRO TIP:** *Ganti URL gambar `placehold.co` di atas dengan tautan screenshot asli aplikasi Nakam Anda (resolusi rasio 9:16 portrait) untuk hasil yang spektakuler.*
+> 💡 **PRO TIP:** *Pindahkan file video `.webp` dari folder lokal ke dalam folder `docs/` di dalam repositori Anda dan ubah *path* `src` di atas menjadi relatif (`docs/nakam_showcase.webp`) sebelum melakukan *push* ke GitHub.*
 
 ---
 
